@@ -37,4 +37,8 @@ public class BrandServiceImpl implements BrandService {
 	public boolean existsBrandName(String name) {
 		return brandRepository.existsByNameIgnoreCase(name);
 	}
+
+	public List<Brand> findByBrandName(String name) {
+		return brandRepository.findByNameContainingIgnoreCase(name);
+	}
 }

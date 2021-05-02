@@ -9,11 +9,7 @@ import com.congnghejava.webbanhang.models.UserCredential;
 
 @Repository
 public interface UserCredentialRepository extends JpaRepository<UserCredential, Long> {
-
-	Optional<UserCredential> findByUsername(String username);
-
-	Boolean existsByUsername(String username);
-
 	Boolean existsByEmail(String email);
 
+	Optional<UserCredential> findByEmail(String email);
 }

@@ -1,6 +1,5 @@
 package com.congnghejava.webbanhang.controllers;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -32,6 +31,7 @@ import com.congnghejava.webbanhang.models.User;
 import com.congnghejava.webbanhang.payload.request.AddProductRequest;
 import com.congnghejava.webbanhang.payload.response.MessageResponse;
 import com.congnghejava.webbanhang.payload.response.ProductResponse;
+import com.congnghejava.webbanhang.security.UserPrincipal;
 import com.congnghejava.webbanhang.services.BrandServiceImpl;
 import com.congnghejava.webbanhang.services.CategoryServiceImpl;
 import com.congnghejava.webbanhang.services.FileStorageService;
@@ -59,24 +59,37 @@ public class ProductController {
 	private BrandServiceImpl brandService;
 
 	@GetMapping
-	public List<ProductResponse> getAllProduct() {
+	public ResponseEntity<?> getAllProduct() {
 		List<ProductResponse> listProductResponse = productService.findAll().stream()
-				.map(product -> new ProductResponse(product, fileStorageService, brandService, categoryService))
+				.map(product -> new ProductResponse(product)).collect(Collectors.toList());
+		return ResponseEntity.status(HttpStatus.OK).body(listProductResponse);
+	}
+
+	@GetMapping(params = { "name", "brandId", "categoryId", "priceStart", "priceEnd" })
+	public ResponseEntity<?> getProductByFilter(@RequestParam(value = "name") String name,
+			@RequestParam(value = "brandId") Long brandId, @RequestParam(value = "categoryId") Long categoryId,
+			@RequestParam(value = "priceStart") int priceStart, @RequestParam(value = "priceEnd") int priceEnd) {
+		System.out.println(brandId + categoryId);
+
+		List<Product> listProduct = productService.findByFilter(name, brandId, categoryId, priceStart, priceEnd);
+
+		List<ProductResponse> listProductResponse = listProduct.stream().map(product -> new ProductResponse(product))
 				.collect(Collectors.toList());
-		return listProductResponse;
+
+		return ResponseEntity.status(HttpStatus.OK).body(listProductResponse);
 	}
 
 	@GetMapping("/{id}")
 	public ProductResponse getProduct(@PathVariable Long id) {
 		Product product = productService.findById(id);
-		return new ProductResponse(product, fileStorageService, brandService, categoryService);
+		return new ProductResponse(product);
 	}
 
 	@PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
 	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_ADMIN')")
 	public ResponseEntity<?> addProduct(@RequestPart("product") @Valid AddProductRequest productRequest,
-			@RequestPart("product_image") MultipartFile file, Principal principal) {
-		User user = userService.getCurrentUser(principal);
+			@RequestPart("product_image") MultipartFile file, UserPrincipal userPrincipal) {
+		User user = userService.getCurrentUser(userPrincipal);
 
 		Brand brandProduct = brandService.findById(productRequest.getBrandId()).get();
 		Category categoryProduct = categoryService.findById(productRequest.getCategoryId()).get();
@@ -86,7 +99,7 @@ public class ProductController {
 
 		FileDB image = new FileDB();
 		try {
-			image = fileStorageService.store(file, userService.getCurrentUser(principal));
+			image = fileStorageService.store(file, userService.getCurrentUser(userPrincipal));
 		} catch (Exception e) {
 			String message = "Could not upload file: " + file.getOriginalFilename() + "!";
 			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new MessageResponse(message));
@@ -97,15 +110,14 @@ public class ProductController {
 
 		productService.save(product);
 
-		return ResponseEntity.status(HttpStatus.OK)
-				.body(new ProductResponse(product, fileStorageService, brandService, categoryService));
+		return ResponseEntity.status(HttpStatus.OK).body(new ProductResponse(product));
 
 	}
 
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_ADMIN')")
 	public ResponseEntity<?> updateProduct(@RequestParam(value = "product_image", required = false) MultipartFile file,
-			@PathVariable Long id, @RequestBody AddProductRequest productRequest, Principal principal) {
+			@PathVariable Long id, @RequestBody AddProductRequest productRequest, UserPrincipal userPrincipal) {
 		Product oldProduct = productService.findById(id);
 
 		Brand brandProduct = brandService.findById(productRequest.getBrandId()).get();
@@ -120,7 +132,7 @@ public class ProductController {
 			product.setImage(oldProduct.getImage());
 		} else {
 			try {
-				image = fileStorageService.store(file, userService.getCurrentUser(principal));
+				image = fileStorageService.store(file, userService.getCurrentUser(userPrincipal));
 			} catch (Exception e) {
 				String message = "Could not upload file: " + file.getOriginalFilename() + "!";
 				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new MessageResponse(message));
@@ -132,8 +144,7 @@ public class ProductController {
 		product.setUser(oldProduct.getUser());
 
 		productService.save(product);
-		return ResponseEntity.status(HttpStatus.OK)
-				.body(new ProductResponse(product, fileStorageService, brandService, categoryService));
+		return ResponseEntity.status(HttpStatus.OK).body(new ProductResponse(product));
 
 	}
 

@@ -1,6 +1,8 @@
 package com.congnghejava.webbanhang.controllers;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.validation.Valid;
 
@@ -16,10 +18,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.congnghejava.webbanhang.models.Category;
 import com.congnghejava.webbanhang.payload.request.CategoryRequest;
+import com.congnghejava.webbanhang.payload.response.CategoryResponse;
 import com.congnghejava.webbanhang.payload.response.MessageResponse;
 import com.congnghejava.webbanhang.services.CategoryServiceImpl;
 
@@ -32,16 +36,23 @@ public class CategoryController {
 	CategoryServiceImpl categoryService;
 
 	@GetMapping
-	public ResponseEntity<Iterable<Category>> getAllCategory() {
-		return new ResponseEntity<>(categoryService.findAll(), HttpStatus.OK);
+	public ResponseEntity<?> getAllCategory() {
+		List<CategoryResponse> categories = categoryService.findAll().stream()
+				.map(category -> new CategoryResponse(category)).collect(Collectors.toList());
+		return new ResponseEntity<>(categories, HttpStatus.OK);
+	}
+
+	@GetMapping(params = "query")
+	public ResponseEntity<?> getByCategoryName(@RequestParam(value = "query") String catName) {
+		List<CategoryResponse> categories = categoryService.findByCategoryName(catName).stream()
+				.map(category -> new CategoryResponse(category)).collect(Collectors.toList());
+		return new ResponseEntity<>(categories, HttpStatus.OK);
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<Category> getCategory(@PathVariable Long id) {
-		Optional<Category> categoryOptional = categoryService.findById(id);
-
-		return categoryOptional.map(tempCategory -> new ResponseEntity<>(tempCategory, HttpStatus.OK))
-				.orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+	public ResponseEntity<?> getCategory(@PathVariable Long id) {
+		Category category = categoryService.findById(id).get();
+		return ResponseEntity.status(HttpStatus.OK).body(new CategoryResponse(category));
 	}
 
 	@PostMapping

@@ -1,6 +1,5 @@
 package com.congnghejava.webbanhang.controllers;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +20,7 @@ import com.congnghejava.webbanhang.models.User;
 import com.congnghejava.webbanhang.payload.request.CartRequest;
 import com.congnghejava.webbanhang.payload.response.CartResponse;
 import com.congnghejava.webbanhang.repository.CartService;
+import com.congnghejava.webbanhang.security.UserPrincipal;
 import com.congnghejava.webbanhang.services.ProductService;
 import com.congnghejava.webbanhang.services.UserService;
 
@@ -37,8 +37,8 @@ public class CartController {
 	ProductService productService;
 
 	@GetMapping
-	public ResponseEntity<?> getAllCart(Principal principal) {
-		User user = userService.getCurrentUser(principal);
+	public ResponseEntity<?> getAllCart(UserPrincipal userPrincipal) {
+		User user = userService.getCurrentUser(userPrincipal);
 		List<CartResponse> cartResponse = cartService.findAllByUser(user).stream().map(cart -> new CartResponse(cart))
 				.collect(Collectors.toList());
 
@@ -46,10 +46,10 @@ public class CartController {
 	}
 
 	@PostMapping
-	public ResponseEntity<?> addCart(@RequestBody CartRequest cartRequest, Principal principal) {
+	public ResponseEntity<?> addCart(@RequestBody CartRequest cartRequest, UserPrincipal userPrincipal) {
 		Product product = productService.findById(cartRequest.getProductId());
 
-		User user = userService.getCurrentUser(principal);
+		User user = userService.getCurrentUser(userPrincipal);
 
 		if (product.getQuantity() < cartRequest.getQuantity()) {
 			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("There are not enough product in stock!");

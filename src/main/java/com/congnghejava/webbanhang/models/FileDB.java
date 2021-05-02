@@ -9,6 +9,7 @@ import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 @Entity
 @Table(name = "files")
@@ -71,4 +72,7 @@ public class FileDB {
 		this.data = data;
 	}
 
+	public String getFileUrl() {
+		return ServletUriComponentsBuilder.fromCurrentContextPath().path("/files/").path(id).toUriString();
+	}
 }

@@ -38,4 +38,8 @@ public class CategoryServiceImpl implements CategoryService {
 	public boolean existsCategoryName(String name) {
 		return categoryRepository.existsByNameIgnoreCase(name);
 	}
+
+	public List<Category> findByCategoryName(String name) {
+		return categoryRepository.findByNameContainingIgnoreCase(name);
+	}
 }

@@ -1,6 +1,8 @@
 package com.congnghejava.webbanhang.controllers;
 
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,10 +16,12 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.congnghejava.webbanhang.models.Brand;
 import com.congnghejava.webbanhang.payload.request.BrandRequest;
+import com.congnghejava.webbanhang.payload.response.BrandResponse;
 import com.congnghejava.webbanhang.payload.response.MessageResponse;
 import com.congnghejava.webbanhang.services.BrandServiceImpl;
 
@@ -30,8 +34,17 @@ public class BrandController {
 	BrandServiceImpl brandService;
 
 	@GetMapping
-	ResponseEntity<Iterable<Brand>> getAllBrand() {
-		return new ResponseEntity<>(brandService.findAll(), HttpStatus.OK);
+	ResponseEntity<?> getAllBrand() {
+		List<BrandResponse> brandResponse = brandService.findAll().stream().map(brand -> new BrandResponse(brand))
+				.collect(Collectors.toList());
+		return ResponseEntity.status(HttpStatus.OK).body(brandResponse);
+	}
+
+	@GetMapping(params = "query")
+	ResponseEntity<?> getAllBrand(@RequestParam(value = "query") String brandTerm) {
+		List<BrandResponse> brandResponse = brandService.findByBrandName(brandTerm).stream()
+				.map(brand -> new BrandResponse(brand)).collect(Collectors.toList());
+		return ResponseEntity.status(HttpStatus.OK).body(brandResponse);
 	}
 
 	@GetMapping("/{id}")

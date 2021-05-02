@@ -10,7 +10,6 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -31,11 +30,8 @@ public class User {
 	@Column(name = "created_date")
 	private Date createdDate;
 
-	@Column(name = "first_name")
-	private String firstName;
-
-	@Column(name = "last_name")
-	private String lastName;
+	@Column(name = "name")
+	private String name;
 
 	@Column(name = "address")
 	private String address;
@@ -54,17 +50,14 @@ public class User {
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private Set<Order> orders = new HashSet<>();
 
-	@OneToOne
-	@JoinColumn(name = "file_avatar_id")
-	private FileDB avatar;
+	private String avatarUrl;
 
 	public User() {
 		this.createdDate = new Date();
 	}
 
-	public User(String firstName, String lastName, String address) {
-		this.firstName = firstName;
-		this.lastName = lastName;
+	public User(String name, String lastName, String address) {
+		this.name = name;
 		this.address = address;
 	}
 
@@ -84,20 +77,12 @@ public class User {
 		this.createdDate = createdDate;
 	}
 
-	public String getFirstName() {
-		return firstName;
+	public String getName() {
+		return name;
 	}
 
-	public void setFirstName(String firstName) {
-		this.firstName = firstName;
-	}
-
-	public String getLastName() {
-		return lastName;
-	}
-
-	public void setLastName(String lastName) {
-		this.lastName = lastName;
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	public String getAddress() {
@@ -124,12 +109,12 @@ public class User {
 		this.reviews = reviews;
 	}
 
-	public FileDB getAvatar() {
-		return avatar;
+	public String getAvatarUrl() {
+		return avatarUrl;
 	}
 
-	public void setAvatar(FileDB avatar) {
-		this.avatar = avatar;
+	public void setAvatarUrl(String avatarUrl) {
+		this.avatarUrl = avatarUrl;
 	}
 
 	public UserCredential getUserCredential() {

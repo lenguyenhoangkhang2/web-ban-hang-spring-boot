@@ -1,6 +1,5 @@
 package com.congnghejava.webbanhang.controllers;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,6 +20,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import com.congnghejava.webbanhang.models.FileDB;
 import com.congnghejava.webbanhang.payload.response.FileResponse;
 import com.congnghejava.webbanhang.payload.response.MessageResponse;
+import com.congnghejava.webbanhang.security.UserPrincipal;
 import com.congnghejava.webbanhang.services.FileStorageService;
 import com.congnghejava.webbanhang.services.UserService;
 
@@ -35,12 +35,12 @@ public class FileController {
 	private UserService userService;
 
 	@PostMapping("/upload")
-	public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file, Principal principal) {
+	public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file, UserPrincipal userPrincipal) {
 		String message = "";
 
 		try {
-			System.out.println(principal.getName());
-			fileStorageService.store(file, userService.getCurrentUser(principal));
+			System.out.println(userPrincipal.getName());
+			fileStorageService.store(file, userService.getCurrentUser(userPrincipal));
 			message = "Upload the file successfully: " + file.getOriginalFilename();
 			return ResponseEntity.status(HttpStatus.OK).body(new MessageResponse(message));
 		} catch (Exception e) {
@@ -68,7 +68,7 @@ public class FileController {
 		FileDB fileDB = fileStorageService.getFile(id);
 
 		return ResponseEntity.ok()
-				.header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileDB.getName() + "\"")
-				.body(fileDB.getData());
+				.header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + fileDB.getName() + "\"")
+				.header(HttpHeaders.CONTENT_TYPE, fileDB.getType()).body(fileDB.getData());
 	}
 }

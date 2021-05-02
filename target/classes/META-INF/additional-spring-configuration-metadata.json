@@ -1,0 +1,32 @@
+{"properties": [
+  {
+    "name": "congnghejava.app.jwtSecret",
+    "type": "java.lang.String",
+    "description": "A description for 'congnghejava.app.jwtSecret'"
+  },
+  {
+    "name": "app.auth.tokenSecret",
+    "type": "java.lang.String",
+    "description": "A description for 'app.auth.tokenSecret'"
+  },
+  {
+    "name": "app.oauth2.authorizedRedirectUris",
+    "type": "java.lang.String",
+    "description": "A description for 'app.oauth2.authorizedRedirectUris'"
+  },
+  {
+    "name": "app.auth.tokenExpirationMsec",
+    "type": "java.lang.String",
+    "description": "A description for 'app.auth.tokenExpirationMsec'"
+  },
+  {
+    "name": "app.oauth2.authorizedRedirectUris",
+    "type": "java.lang.String",
+    "description": "A description for 'app.oauth2.authorizedRedirectUris'"
+  },
+  {
+    "name": "app.auth.tokenSecret",
+    "type": "java.lang.String",
+    "description": "A description for 'app.auth.tokenSecret'"
+  }
+]}

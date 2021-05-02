@@ -1,6 +1,5 @@
 package com.congnghejava.webbanhang.controllers;
 
-import java.security.Principal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -22,6 +21,7 @@ import com.congnghejava.webbanhang.models.Order;
 import com.congnghejava.webbanhang.models.User;
 import com.congnghejava.webbanhang.payload.response.OrderResponse;
 import com.congnghejava.webbanhang.repository.CartService;
+import com.congnghejava.webbanhang.security.UserPrincipal;
 import com.congnghejava.webbanhang.services.OrderService;
 import com.congnghejava.webbanhang.services.UserService;
 
@@ -50,8 +50,8 @@ public class OrderController {
 	}
 
 	@GetMapping(params = "userId")
-	public ResponseEntity<?> getAllByUser(@PathParam(value = "userId") Long userId, Principal principal) {
-		User user = userService.getCurrentUser(principal);
+	public ResponseEntity<?> getAllByUser(@PathParam(value = "userId") Long userId, UserPrincipal userPrincipal) {
+		User user = userService.getCurrentUser(userPrincipal);
 
 		List<OrderResponse> orderResponses = orderService.findAllByUser(user).stream()
 				.map(order -> new OrderResponse(order)).collect(Collectors.toList());
@@ -59,8 +59,8 @@ public class OrderController {
 	}
 
 	@PostMapping
-	public ResponseEntity<?> addOrder(Principal principal) {
-		User user = userService.getCurrentUser(principal);
+	public ResponseEntity<?> addOrder(UserPrincipal userPrincipal) {
+		User user = userService.getCurrentUser(userPrincipal);
 		List<Cart> carts = cartService.findAllByUser(user);
 
 		Order order = new Order(user, carts);

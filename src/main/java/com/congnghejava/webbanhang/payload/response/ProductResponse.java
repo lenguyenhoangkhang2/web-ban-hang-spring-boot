@@ -4,11 +4,7 @@ import java.util.Date;
 
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import com.congnghejava.webbanhang.models.FileDB;
 import com.congnghejava.webbanhang.models.Product;
-import com.congnghejava.webbanhang.services.BrandServiceImpl;
-import com.congnghejava.webbanhang.services.CategoryServiceImpl;
-import com.congnghejava.webbanhang.services.FileStorageService;
 
 public class ProductResponse {
 
@@ -28,37 +24,18 @@ public class ProductResponse {
 
 	}
 
-	public ProductResponse(Long id, String name, String description, String brandName, String categoryName, int price,
-			int discount, int quantity, Long userId, Date createdDate, String imageUrl) {
-		this.id = id;
-		this.name = name;
-		this.description = description;
-		this.brandName = brandName;
-		this.categoryName = categoryName;
-		this.price = price;
-		this.discount = discount;
-		this.quantity = quantity;
-		this.userId = userId;
-		this.createdDate = createdDate;
-		this.imageUrl = imageUrl;
-	}
-
-	public ProductResponse(Product product, FileStorageService fileStorageService, BrandServiceImpl brandService,
-			CategoryServiceImpl categoryService) {
-		String imageUrl = product.getImage().getId();
-		FileDB fileImage = fileStorageService.findById(imageUrl);
-
+	public ProductResponse(Product product) {
 		this.id = product.getId();
 		this.userId = product.getUser().getId();
 		this.name = product.getName();
 		this.description = product.getDescription();
-		this.brandName = brandService.findById(product.getBrand().getId()).get().getName();
-		this.categoryName = categoryService.findById(product.getCategory().getId()).get().getName();
+		this.brandName = product.getBrand().getName();
+		this.categoryName = product.getCategory().getName();
 		this.price = product.getPrice();
 		this.discount = product.getDiscount();
 		this.quantity = product.getQuantity();
-		this.imageUrl = ServletUriComponentsBuilder.fromCurrentContextPath().path("/files/").path(fileImage.getId())
-				.toUriString();
+		this.imageUrl = ServletUriComponentsBuilder.fromCurrentContextPath().path("/files/")
+				.path(product.getImage().getId()).toUriString();
 		this.createdDate = product.getCreatedDate();
 	}
 
