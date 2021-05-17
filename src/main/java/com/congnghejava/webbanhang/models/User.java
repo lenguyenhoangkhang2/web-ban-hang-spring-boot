@@ -33,8 +33,8 @@ public class User {
 	@Column(name = "name")
 	private String name;
 
-	@Column(name = "address")
-	private String address;
+	@OneToMany(mappedBy = "user")
+	private Set<Address> address = new HashSet<>();
 
 	@OneToMany(mappedBy = "user", cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
 			CascadeType.REFRESH })
@@ -54,11 +54,6 @@ public class User {
 
 	public User() {
 		this.createdDate = new Date();
-	}
-
-	public User(String name, String lastName, String address) {
-		this.name = name;
-		this.address = address;
 	}
 
 	public Long getId() {
@@ -85,11 +80,11 @@ public class User {
 		this.name = name;
 	}
 
-	public String getAddress() {
+	public Set<Address> getAddress() {
 		return address;
 	}
 
-	public void setAddress(String address) {
+	public void setAddress(Set<Address> address) {
 		this.address = address;
 	}
 

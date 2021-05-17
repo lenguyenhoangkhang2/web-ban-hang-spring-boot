@@ -14,7 +14,7 @@ public class UserCredentialService {
 	UserCredentialRepository userCredentialRepository;
 
 	public UserCredential getCurrentUserCredential(UserPrincipal userPrincipal) {
-		String email = userPrincipal.getName();
+		String email = userPrincipal.getEmail();
 
 		UserCredential userCredential = userCredentialRepository.findByEmail(email)
 				.orElseThrow(() -> new UsernameNotFoundException("User Not Found with email: " + email));

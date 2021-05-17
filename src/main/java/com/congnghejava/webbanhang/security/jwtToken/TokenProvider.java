@@ -48,9 +48,10 @@ public class TokenProvider {
 	}
 
 	public Long getUserIdFromToken(String token) {
-		Claims claims = Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJwt(token)
+		Claims claims = Jwts.parser().setSigningKey(appProperties.getAuth().getTokenSecret()).parseClaimsJws(token)
 				.getBody();
 
+		logger.info("Get user id: " + claims.getSubject() + " from JWT token");
 		return Long.parseLong(claims.getSubject());
 	}
 

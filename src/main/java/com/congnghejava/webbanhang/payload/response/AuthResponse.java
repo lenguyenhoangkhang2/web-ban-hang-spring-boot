@@ -1,19 +1,19 @@
 package com.congnghejava.webbanhang.payload.response;
 
 public class AuthResponse {
-	private String accsessToken;
+	private String accessToken;
 	private String tokenType = "Bearer";
 
 	public AuthResponse(String accessToken) {
-		this.accsessToken = accessToken;
+		this.accessToken = accessToken;
 	}
 
-	public String getAccsessToken() {
-		return accsessToken;
+	public String getAccessToken() {
+		return accessToken;
 	}
 
-	public void setAccsessToken(String accsessToken) {
-		this.accsessToken = accsessToken;
+	public void setAccessToken(String accessToken) {
+		this.accessToken = accessToken;
 	}
 
 	public String getTokenType() {
@@ -23,4 +23,5 @@ public class AuthResponse {
 	public void setTokenType(String tokenType) {
 		this.tokenType = tokenType;
 	}
+
 }

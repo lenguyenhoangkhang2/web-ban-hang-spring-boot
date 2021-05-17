@@ -13,10 +13,10 @@ public class WebMvcConfig implements WebMvcConfigurer {
 		// @formatter:off
 		
 		registry.addMapping("/**")
-		.allowedOrigins("*")
+		.allowedOrigins("http://localhost:3000")
 		.allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
-		.allowedHeaders("*")
-		.allowCredentials(true).maxAge(MAX_AGE_SECS);
+		.allowedHeaders("Content-type", "Authorization", "x-xsrf-token", "Access-Control-Allow-Headers","Access-Control-Request-Method")
+		.maxAge(MAX_AGE_SECS);
 		
 		// @formatter:on
 	}

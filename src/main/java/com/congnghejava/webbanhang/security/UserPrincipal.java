@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -15,6 +17,8 @@ import com.congnghejava.webbanhang.models.UserCredential;
 public class UserPrincipal implements OAuth2User, UserDetails {
 
 	private static final long serialVersionUID = 1L;
+
+	private static final Logger logger = LoggerFactory.getLogger(UserPrincipal.class);
 
 	private Long id;
 	private String email;
@@ -33,13 +37,19 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 		List<GrantedAuthority> authorities = userCredential.getRoles().stream()
 				.map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList());
 
-		return new UserPrincipal(userCredential.getId(), userCredential.getEmail(), userCredential.getPassword(),
-				authorities);
+		UserPrincipal userPrincipal = new UserPrincipal(userCredential.getId(), userCredential.getEmail(),
+				userCredential.getPassword(), authorities);
+
+		logger.debug("Create UserPrincipal from UserCredential: " + userPrincipal.toString());
+
+		return userPrincipal;
 	}
 
 	public static UserPrincipal create(UserCredential userCredential, Map<String, Object> attributes) {
 		UserPrincipal userPrincipal = UserPrincipal.create(userCredential);
 		userPrincipal.setAttributes(attributes);
+
+		logger.debug("Create UserPrincipal from UserCredential and attributes: " + userPrincipal.toString());
 		return userPrincipal;
 	}
 
@@ -98,6 +108,12 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 
 	public void setAttributes(Map<String, Object> attributes) {
 		this.attributes = attributes;
+	}
+
+	@Override
+	public String toString() {
+		return "UserPrincipal [id=" + id + ", email=" + email + ", password=" + password + ", authorities="
+				+ authorities + ", attributes=" + attributes + "]";
 	}
 
 }

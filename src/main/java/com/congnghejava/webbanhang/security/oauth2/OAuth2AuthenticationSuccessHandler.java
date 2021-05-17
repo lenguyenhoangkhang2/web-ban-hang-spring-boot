@@ -11,6 +11,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.web.authentication.SimpleUrlAuthenticationSuccessHandler;
@@ -29,6 +31,8 @@ public class OAuth2AuthenticationSuccessHandler extends SimpleUrlAuthenticationS
 	private AppProperties appProperties;
 
 	private HttpCookieOAuth2AuthorizationRequestRepository httpCookieOAuth2AuthorizationRequestRepository;
+
+	private static final Logger logger = LoggerFactory.getLogger(OAuth2AuthenticationFailureHandler.class);
 
 	@Autowired
 	OAuth2AuthenticationSuccessHandler(TokenProvider tokenProvider, AppProperties appProperties,

@@ -1,7 +1,6 @@
 package com.congnghejava.webbanhang.controllers;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import javax.validation.Valid;
 
@@ -27,10 +26,13 @@ import com.congnghejava.webbanhang.models.Brand;
 import com.congnghejava.webbanhang.models.Category;
 import com.congnghejava.webbanhang.models.FileDB;
 import com.congnghejava.webbanhang.models.Product;
+import com.congnghejava.webbanhang.models.ProductPage;
+import com.congnghejava.webbanhang.models.ProductSearchCriteria;
 import com.congnghejava.webbanhang.models.User;
 import com.congnghejava.webbanhang.payload.request.AddProductRequest;
 import com.congnghejava.webbanhang.payload.response.MessageResponse;
 import com.congnghejava.webbanhang.payload.response.ProductResponse;
+import com.congnghejava.webbanhang.security.CurrentUser;
 import com.congnghejava.webbanhang.security.UserPrincipal;
 import com.congnghejava.webbanhang.services.BrandServiceImpl;
 import com.congnghejava.webbanhang.services.CategoryServiceImpl;
@@ -59,24 +61,23 @@ public class ProductController {
 	private BrandServiceImpl brandService;
 
 	@GetMapping
-	public ResponseEntity<?> getAllProduct() {
-		List<ProductResponse> listProductResponse = productService.findAll().stream()
-				.map(product -> new ProductResponse(product)).collect(Collectors.toList());
-		return ResponseEntity.status(HttpStatus.OK).body(listProductResponse);
-	}
+	public ResponseEntity<?> getAllProduct(ProductPage productPage, @RequestParam(value = "name") Optional<String> name,
+			@RequestParam(value = "brand") Optional<String> brand,
+			@RequestParam(value = "category") Optional<String> category) {
+		ProductSearchCriteria productSearchCriteria = new ProductSearchCriteria();
 
-	@GetMapping(params = { "name", "brandId", "categoryId", "priceStart", "priceEnd" })
-	public ResponseEntity<?> getProductByFilter(@RequestParam(value = "name") String name,
-			@RequestParam(value = "brandId") Long brandId, @RequestParam(value = "categoryId") Long categoryId,
-			@RequestParam(value = "priceStart") int priceStart, @RequestParam(value = "priceEnd") int priceEnd) {
-		System.out.println(brandId + categoryId);
+		if (name.isPresent()) {
+			productSearchCriteria.setName(name.get());
+		}
+		if (brand.isPresent()) {
+			productSearchCriteria.setBrand(brand.get());
+		}
+		if (category.isPresent()) {
+			productSearchCriteria.setCatorory(category.get());
+		}
 
-		List<Product> listProduct = productService.findByFilter(name, brandId, categoryId, priceStart, priceEnd);
-
-		List<ProductResponse> listProductResponse = listProduct.stream().map(product -> new ProductResponse(product))
-				.collect(Collectors.toList());
-
-		return ResponseEntity.status(HttpStatus.OK).body(listProductResponse);
+		return new ResponseEntity<>(productService.findAllWithFilter(productPage, productSearchCriteria),
+				HttpStatus.OK);
 	}
 
 	@GetMapping("/{id}")
@@ -86,9 +87,10 @@ public class ProductController {
 	}
 
 	@PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_ADMIN')")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<?> addProduct(@RequestPart("product") @Valid AddProductRequest productRequest,
-			@RequestPart("product_image") MultipartFile file, UserPrincipal userPrincipal) {
+			@RequestPart("product_image") MultipartFile file, @CurrentUser UserPrincipal userPrincipal) {
+		System.out.println(userPrincipal);
 		User user = userService.getCurrentUser(userPrincipal);
 
 		Brand brandProduct = brandService.findById(productRequest.getBrandId()).get();
