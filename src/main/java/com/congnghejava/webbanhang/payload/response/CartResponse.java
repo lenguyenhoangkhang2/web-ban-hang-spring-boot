@@ -1,10 +1,19 @@
 package com.congnghejava.webbanhang.payload.response;
 
+import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.congnghejava.webbanhang.models.Cart;
+import com.congnghejava.webbanhang.models.EProductImageTypeDisplay;
+import com.congnghejava.webbanhang.models.ProductImage;
+import com.congnghejava.webbanhang.services.ProductImageServiceImpl;
 
 public class CartResponse {
+	@Autowired
+	ProductImageServiceImpl productImageService;
+
 	private Long cartId;
 
 	private String productImageUrl;
@@ -16,10 +25,15 @@ public class CartResponse {
 	private long total;
 
 	public CartResponse(Cart cart) {
+		Optional<ProductImage> image = productImageService.findFirstByProductAndType(cart.getProduct(),
+				EProductImageTypeDisplay.Official);
+		if (image.isPresent()) {
+			this.productImageUrl = ServletUriComponentsBuilder.fromCurrentContextPath().path("/files/")
+					.path(image.get().getName()).toUriString();
+		}
+
 		this.cartId = cart.getId();
 		this.productName = cart.getProduct().getName();
-		this.productImageUrl = ServletUriComponentsBuilder.fromCurrentContextPath().path("/files/")
-				.path(cart.getProduct().getImage().getId()).toUriString();
 		this.quantity = cart.getQuantity();
 		this.total = cart.getTotal();
 	}

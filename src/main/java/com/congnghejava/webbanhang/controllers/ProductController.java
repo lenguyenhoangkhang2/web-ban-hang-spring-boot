@@ -1,5 +1,7 @@
 package com.congnghejava.webbanhang.controllers;
 
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 
 import javax.validation.Valid;
@@ -24,20 +26,26 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.congnghejava.webbanhang.models.Brand;
 import com.congnghejava.webbanhang.models.Category;
-import com.congnghejava.webbanhang.models.FileDB;
+import com.congnghejava.webbanhang.models.EProductImageTypeDisplay;
+import com.congnghejava.webbanhang.models.EProductCategory;
+import com.congnghejava.webbanhang.models.LaptopDetails;
 import com.congnghejava.webbanhang.models.Product;
 import com.congnghejava.webbanhang.models.ProductPage;
 import com.congnghejava.webbanhang.models.ProductSearchCriteria;
+import com.congnghejava.webbanhang.models.SmartPhoneDetails;
 import com.congnghejava.webbanhang.models.User;
-import com.congnghejava.webbanhang.payload.request.AddProductRequest;
+import com.congnghejava.webbanhang.payload.request.ProductRequest;
 import com.congnghejava.webbanhang.payload.response.MessageResponse;
 import com.congnghejava.webbanhang.payload.response.ProductResponse;
 import com.congnghejava.webbanhang.security.CurrentUser;
 import com.congnghejava.webbanhang.security.UserPrincipal;
 import com.congnghejava.webbanhang.services.BrandServiceImpl;
 import com.congnghejava.webbanhang.services.CategoryServiceImpl;
-import com.congnghejava.webbanhang.services.FileStorageService;
+import com.congnghejava.webbanhang.services.FileStorageServiceImpl;
+import com.congnghejava.webbanhang.services.LaptopDetailsServiceImpl;
+import com.congnghejava.webbanhang.services.ProductImageServiceImpl;
 import com.congnghejava.webbanhang.services.ProductService;
+import com.congnghejava.webbanhang.services.SmartPhoneDetailsServiceImpl;
 import com.congnghejava.webbanhang.services.UserService;
 
 @CrossOrigin(origins = "*", maxAge = 3600)
@@ -52,13 +60,22 @@ public class ProductController {
 	UserService userService;
 
 	@Autowired
-	FileStorageService fileStorageService;
+	FileStorageServiceImpl fileStorageService;
+
+	@Autowired
+	ProductImageServiceImpl productImageService;
 
 	@Autowired
 	CategoryServiceImpl categoryService;
 
 	@Autowired
-	private BrandServiceImpl brandService;
+	BrandServiceImpl brandService;
+
+	@Autowired
+	LaptopDetailsServiceImpl laptopDetailsService;
+
+	@Autowired
+	SmartPhoneDetailsServiceImpl smartPhoneDetailsService;
 
 	@GetMapping
 	public ResponseEntity<?> getAllProduct(ProductPage productPage, @RequestParam(value = "name") Optional<String> name,
@@ -86,76 +103,187 @@ public class ProductController {
 		return new ProductResponse(product);
 	}
 
+	// @formatter:off
 	@PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	public ResponseEntity<?> addProduct(@RequestPart("product") @Valid AddProductRequest productRequest,
-			@RequestPart("product_image") MultipartFile file, @CurrentUser UserPrincipal userPrincipal) {
-		System.out.println(userPrincipal);
+	public ResponseEntity<?> addProduct(@RequestPart("product") @Valid ProductRequest productRequest,
+										@RequestPart("official") MultipartFile official, 
+										@RequestPart("banner") MultipartFile banner,
+										@RequestPart("slider") MultipartFile[] slider, 
+										@CurrentUser UserPrincipal userPrincipal) {
+	// @formatter:on
 		User user = userService.getCurrentUser(userPrincipal);
 
 		Brand brandProduct = brandService.findById(productRequest.getBrandId()).get();
+
 		Category categoryProduct = categoryService.findById(productRequest.getCategoryId()).get();
 
-		Product product = new Product(productRequest.getName(), productRequest.getDescription(), categoryProduct,
-				brandProduct, productRequest.getPrice(), productRequest.getQuantity(), productRequest.getDiscount());
+		EProductCategory productType = EProductCategory.valueOf(productRequest.getType());
 
-		FileDB image = new FileDB();
 		try {
-			image = fileStorageService.store(file, userService.getCurrentUser(userPrincipal));
+			// @formatter:off
+			Product product = new Product(productType, 
+										  productRequest.getName(), 
+										  productRequest.getDescription(),
+										  categoryProduct, 
+										  brandProduct,
+										  productRequest.getPrice(), 
+										  productRequest.getQuantity(),
+										  productRequest.getDiscount());
+
+			product.setUser(user);
+			productService.save(product);
+			// @formatter:on
+
+			fileStorageService.saveImageForProduct(official, product, EProductImageTypeDisplay.Official);
+
+			fileStorageService.saveImageForProduct(banner, product, EProductImageTypeDisplay.Banner);
+
+			Arrays.asList(slider).stream().forEach(file -> {
+				fileStorageService.saveImageForProduct(file, product, EProductImageTypeDisplay.Slider);
+			});
+
+			// @formatter:off
+			switch (productType) {
+			case Laptop:
+				LaptopDetails laptopDetails = new LaptopDetails(product, 
+																productRequest.getCpu(),
+																productRequest.getRam(), 
+																productRequest.getHardDrive(), 
+																productRequest.getDisplay(),
+																productRequest.getSize(), 
+																productRequest.getOperatingSystem(), 
+																productRequest.getDesign());
+				laptopDetailsService.save(laptopDetails);
+				break;
+			case SmartPhone:
+				SmartPhoneDetails smartPhoneDetails = new SmartPhoneDetails(product, 
+																			productRequest.getDisplay(),
+																			productRequest.getOperatingSystem(), 
+																			productRequest.getFontCamera(),
+																			productRequest.getRearCamera(), 
+																			productRequest.getChipName(),
+																			productRequest.getInternalMemory(), 
+																			productRequest.getExternalMemory(), 
+																			productRequest.getSim(),
+																			productRequest.getBatteryCapacity());
+				smartPhoneDetailsService.save(smartPhoneDetails);
+				break;
+			default:
+				break;
+			}
+			// @formatter:on
+
+			return ResponseEntity.status(HttpStatus.OK).body(new MessageResponse("Create product successfully"));
 		} catch (Exception e) {
-			String message = "Could not upload file: " + file.getOriginalFilename() + "!";
-			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new MessageResponse(message));
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
+					.body(new MessageResponse(e.getLocalizedMessage()));
 		}
-
-		product.setUser(user);
-		product.setImage(image);
-
-		productService.save(product);
-
-		return ResponseEntity.status(HttpStatus.OK).body(new ProductResponse(product));
-
 	}
 
+	// @formatter:off
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_ADMIN')")
-	public ResponseEntity<?> updateProduct(@RequestParam(value = "product_image", required = false) MultipartFile file,
-			@PathVariable Long id, @RequestBody AddProductRequest productRequest, UserPrincipal userPrincipal) {
+	public ResponseEntity<?> updateProduct(@RequestPart(value = "official", required = false) MultipartFile official,
+										@RequestPart(value = "banner", required = false) MultipartFile banner,
+										@RequestPart(value = "slider", required = false) MultipartFile[] slider, 
+										@PathVariable Long id,
+										@RequestBody ProductRequest productRequest, UserPrincipal userPrincipal) {
+	// @formatter:on
 		Product oldProduct = productService.findById(id);
 
 		Brand brandProduct = brandService.findById(productRequest.getBrandId()).get();
 		Category categoryProduct = categoryService.findById(productRequest.getCategoryId()).get();
 
-		Product product = new Product(productRequest.getName(), productRequest.getDescription(), categoryProduct,
-				brandProduct, productRequest.getPrice(), productRequest.getQuantity(), productRequest.getDiscount());
+		EProductCategory productType = EProductCategory.valueOf(productRequest.getType());
 
-		FileDB image = new FileDB();
+		try {
+			// @formatter:off
+			Product product = new Product(productType, 
+					  productRequest.getName(), 
+					  productRequest.getDescription(),
+					  categoryProduct, brandProduct, 
+					  productRequest.getPrice(), 
+					  productRequest.getQuantity(),
+					  productRequest.getDiscount());
 
-		if (file.isEmpty()) {
-			product.setImage(oldProduct.getImage());
-		} else {
-			try {
-				image = fileStorageService.store(file, userService.getCurrentUser(userPrincipal));
-			} catch (Exception e) {
-				String message = "Could not upload file: " + file.getOriginalFilename() + "!";
-				return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED).body(new MessageResponse(message));
+			product.setId(oldProduct.getId());
+			product.setUser(oldProduct.getUser());
+			
+			productService.save(product);
+			// @formatter:on
+
+			if (Objects.nonNull(official)) {
+				productImageService.deleteByProductAndType(product, EProductImageTypeDisplay.Official);
+				fileStorageService.saveImageForProduct(official, product, EProductImageTypeDisplay.Official);
 			}
-			product.setImage(image);
+
+			if (Objects.nonNull(banner)) {
+				productImageService.deleteByProductAndType(product, EProductImageTypeDisplay.Banner);
+				fileStorageService.saveImageForProduct(banner, product, EProductImageTypeDisplay.Banner);
+			}
+
+			if (Objects.nonNull(slider)) {
+				productImageService.deleteByProductAndType(product, EProductImageTypeDisplay.Slider);
+				Arrays.asList(slider).stream().forEach(image -> {
+					fileStorageService.saveImageForProduct(image, product, EProductImageTypeDisplay.Slider);
+				});
+			}
+
+			// @formatter:off
+			switch (productType) {
+			case Laptop:
+				Long oldLaptopDetailsId = laptopDetailsService.findByProduct(oldProduct).getId();
+				LaptopDetails laptopDetails = new LaptopDetails(product, 
+																productRequest.getCpu(),
+																productRequest.getRam(), 
+																productRequest.getHardDrive(), 
+																productRequest.getDisplay(),
+																productRequest.getSize(), 
+																productRequest.getOperatingSystem(), 
+																productRequest.getDesign());
+				laptopDetails.setId(oldLaptopDetailsId);
+				laptopDetailsService.save(laptopDetails);
+				break;
+			case SmartPhone:
+				Long oldSmartPhoneDetailsId = smartPhoneDetailsService.findByProduct(oldProduct).getId();
+				SmartPhoneDetails smartPhoneDetails = new SmartPhoneDetails(product, 
+																			productRequest.getDisplay(),
+																			productRequest.getOperatingSystem(), 
+																			productRequest.getFontCamera(),
+																			productRequest.getRearCamera(), 
+																			productRequest.getChipName(),
+																			productRequest.getInternalMemory(), 
+																			productRequest.getExternalMemory(), 
+																			productRequest.getSim(),
+																			productRequest.getBatteryCapacity());
+				smartPhoneDetails.setId(oldSmartPhoneDetailsId);
+				smartPhoneDetailsService.save(smartPhoneDetails);
+				break;
+			default:
+				break;
+			}
+			// @formatter:on
+
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.EXPECTATION_FAILED)
+					.body(new MessageResponse(e.getLocalizedMessage()));
 		}
-
-		product.setId(oldProduct.getId());
-		product.setUser(oldProduct.getUser());
-
-		productService.save(product);
-		return ResponseEntity.status(HttpStatus.OK).body(new ProductResponse(product));
+		return ResponseEntity.status(HttpStatus.OK).body(new MessageResponse("Updated product successfully"));
 
 	}
 
 	@DeleteMapping("/{id}")
-	@PreAuthorize("hasRole('ROLE_ADMIN') or hasRole('ROLE_ADMIN')")
+	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
-		if (productService.findById(id) != null) {
-			productService.remove(id);
-		}
+		Product product = productService.findById(id);
+		productImageService.deleteByProduct(product);
+		productService.remove(id);
 		return ResponseEntity.status(HttpStatus.OK).body("Successfully deleted");
+	}
+
+	@GetMapping("/type")
+	public ResponseEntity<?> getTypeProduct() {
+		return ResponseEntity.status(HttpStatus.OK).body(Arrays.asList(EProductCategory.values()));
 	}
 }

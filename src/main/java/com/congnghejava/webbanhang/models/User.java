@@ -43,10 +43,6 @@ public class User {
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private Set<Review> reviews = new HashSet<>();
 
-	@OneToMany(mappedBy = "user", cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
-			CascadeType.REFRESH })
-	private Set<FileDB> files = new HashSet<>();
-
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
 	private Set<Order> orders = new HashSet<>();
 
@@ -118,14 +114,6 @@ public class User {
 
 	public void setUserCredential(UserCredential userCredential) {
 		this.userCredential = userCredential;
-	}
-
-	public Set<FileDB> getFiles() {
-		return files;
-	}
-
-	public void setFiles(Set<FileDB> files) {
-		this.files = files;
 	}
 
 	public Set<Order> getOrders() {

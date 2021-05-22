@@ -6,10 +6,11 @@ import java.util.stream.Stream;
 import org.springframework.core.io.Resource;
 import org.springframework.web.multipart.MultipartFile;
 
-public interface FilesStorageServiceV2 {
-	public void init();
+import com.congnghejava.webbanhang.models.EProductImageTypeDisplay;
+import com.congnghejava.webbanhang.models.Product;
 
-	public String save(MultipartFile file);
+public interface FilesStorageService {
+	public void init();
 
 	public Resource load(String filename);
 
@@ -18,4 +19,8 @@ public interface FilesStorageServiceV2 {
 	public void delete(String filename);
 
 	public Stream<Path> loadAll();
+
+	public String save(MultipartFile file);
+
+	public void saveImageForProduct(MultipartFile file, Product product, EProductImageTypeDisplay type);
 }

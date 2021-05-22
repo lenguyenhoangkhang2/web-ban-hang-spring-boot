@@ -1,7 +1,6 @@
 package com.congnghejava.webbanhang.services;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -9,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import com.congnghejava.webbanhang.models.Brand;
 import com.congnghejava.webbanhang.models.Category;
+import com.congnghejava.webbanhang.models.EProductCategory;
 import com.congnghejava.webbanhang.models.Product;
 import com.congnghejava.webbanhang.models.ProductPage;
 import com.congnghejava.webbanhang.models.ProductSearchCriteria;
@@ -27,7 +27,13 @@ public class ProductService {
 	ProductCriteriaRepository productCriteriaRepository;
 
 	@Autowired
-	FileStorageService fileStorageService;
+	FileStorageServiceImpl fileStorageServiceImpl;
+
+	@Autowired
+	SmartPhoneDetailsServiceImpl smartPhoneDetailsService;
+
+	@Autowired
+	LaptopDetailsServiceImpl laptopDetailsService;
 
 	public List<Product> findAll() {
 		return productRepository.findAll();
@@ -60,27 +66,16 @@ public class ProductService {
 		productRepository.deleteById(theId);
 	}
 
-	public List<Product> findByFilter(String name, Long brandId, Long categoryId, int priceStart, int priceEnd) {
-		List<Product> products = productRepository.findAll();
+	public Object getDetails(Product product) {
 
-		if (!name.isEmpty()) {
-			products = products.stream().filter(product -> product.getName().toLowerCase().contains(name.toLowerCase()))
-					.collect(Collectors.toList());
+		EProductCategory productType = product.getProductType();
+		switch (productType) {
+		case Laptop:
+			return laptopDetailsService.findByProduct(product);
+		case SmartPhone:
+			return smartPhoneDetailsService.findByProduct(product);
+		default:
+			return null;
 		}
-		if (brandId != 0) {
-			products = products.stream().filter(product -> product.getBrand().getId() == brandId)
-					.collect(Collectors.toList());
-		}
-
-		if (categoryId != 0) {
-			products = products.stream().filter(product -> product.getCategory().getId() == categoryId)
-					.collect(Collectors.toList());
-		}
-
-		products = products.stream()
-				.filter(product -> product.getPrice() >= priceStart && product.getPrice() <= priceEnd)
-				.collect(Collectors.toList());
-
-		return products;
 	}
 }

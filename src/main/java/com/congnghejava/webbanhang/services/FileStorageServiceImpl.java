@@ -7,14 +7,21 @@ import java.nio.file.Paths;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileSystemUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.congnghejava.webbanhang.models.EProductImageTypeDisplay;
+import com.congnghejava.webbanhang.models.Product;
+
 @Service
-public class FileStorageServiceImplV2 implements FilesStorageServiceV2 {
+public class FileStorageServiceImpl implements FilesStorageService {
+
+	@Autowired
+	ProductImageServiceImpl productImageService;
 
 	private final Path root = Paths.get("uploads");
 
@@ -80,4 +87,9 @@ public class FileStorageServiceImplV2 implements FilesStorageServiceV2 {
 		}
 	}
 
+	@Override
+	public void saveImageForProduct(MultipartFile file, Product product, EProductImageTypeDisplay type) {
+		String fileName = save(file);
+		productImageService.save(product, fileName, type);
+	}
 }

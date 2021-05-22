@@ -1,14 +1,20 @@
 package com.congnghejava.webbanhang.payload.response;
 
 import java.util.Date;
+import java.util.Objects;
 
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import com.congnghejava.webbanhang.models.Product;
+import com.congnghejava.webbanhang.services.ProductService;
 
 public class ProductResponse {
 
+	@Autowired
+	ProductService productService;
+
 	private Long id;
+	private String type;
 	private String name;
 	private String description;
 	private String brandName;
@@ -18,15 +24,16 @@ public class ProductResponse {
 	private int quantity;
 	private Long userId;
 	private Date createdDate;
-	private String imageUrl;
+	private ProductImageResponse imageUrls;
+	private Object details;
 
 	public ProductResponse() {
-
 	}
 
 	public ProductResponse(Product product) {
 		this.id = product.getId();
 		this.userId = product.getUser().getId();
+		this.type = product.getProductType().toString();
 		this.name = product.getName();
 		this.description = product.getDescription();
 		this.brandName = product.getBrand().getName();
@@ -34,9 +41,9 @@ public class ProductResponse {
 		this.price = product.getPrice();
 		this.discount = product.getDiscount();
 		this.quantity = product.getQuantity();
-		this.imageUrl = ServletUriComponentsBuilder.fromCurrentContextPath().path("/files/")
-				.path(product.getImage().getId()).toUriString();
+		this.imageUrls = new ProductImageResponse(product);
 		this.createdDate = product.getCreatedDate();
+		this.details = productService.getDetails(product);
 	}
 
 	public Long getId() {
@@ -119,12 +126,28 @@ public class ProductResponse {
 		this.createdDate = createdDate;
 	}
 
-	public String getImageUri() {
-		return imageUrl;
+	public ProductImageResponse getImageUrls() {
+		return imageUrls;
 	}
 
-	public void setImageUri(String imageUri) {
-		this.imageUrl = imageUri;
+	public void setImageUrls(ProductImageResponse imageUrls) {
+		this.imageUrls = imageUrls;
+	}
+
+	public String getType() {
+		return type;
+	}
+
+	public void setType(String type) {
+		this.type = type;
+	}
+
+	public Object getDetails() {
+		return this.details;
+	}
+
+	public void setDetails(Objects details) {
+		this.details = details;
 	}
 
 }

@@ -7,6 +7,8 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -14,7 +16,6 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
@@ -28,8 +29,16 @@ public class Product {
 	@JoinColumn(name = "user_id")
 	private User user;
 
+	@Enumerated(EnumType.STRING)
+	@Column(name = "category")
+	private EProductCategory category;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "brand")
+	private EProductBrand brand;
+
 	@Column(name = "created_date")
-	private Date createdDate;
+	private Date createdDate = new Date();
 
 	@Column(name = "name")
 	private String name;
@@ -46,27 +55,23 @@ public class Product {
 	@Column(name = "discount")
 	private int discount;
 
-	@OneToOne
-	@JoinColumn(name = "file_id")
-	private FileDB image;
+	@OneToMany(cascade = CascadeType.ALL, mappedBy = "product")
+	private Set<ProductImage> images = new HashSet<>();
 
-	@ManyToOne()
-	@JoinColumn(name = "category_id", nullable = false)
-	private Category category;
-
-	@ManyToOne()
-	@JoinColumn(name = "brand_id", nullable = false)
-	private Brand brand;
-
-	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-	@JoinColumn(name = "product_id")
+	@OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL, mappedBy = "product")
 	private Set<Review> reviews = new HashSet<>();
 
 	public Product() {
 	}
 
-	public Product(String name, String description, Category category, Brand brand, int price, int quantity,
-			int discount) {
+	// @formatter:off
+	public Product(String name, 
+				   String description, 
+				   EProductCategory category, 
+				   EProductBrand brand, 
+				   int price,
+				   int quantity, 
+				   int discount) {
 		this.name = name;
 		this.description = description;
 		this.category = category;
@@ -74,8 +79,8 @@ public class Product {
 		this.price = price;
 		this.quantity = quantity;
 		this.discount = discount;
-		this.createdDate = new Date();
 	}
+	// @formatter:on
 
 	public Long getId() {
 		return id;
@@ -109,28 +114,12 @@ public class Product {
 		this.description = description;
 	}
 
-	public FileDB getImage() {
-		return image;
+	public Set<ProductImage> getImages() {
+		return images;
 	}
 
-	public void setImage(FileDB fileImage) {
-		this.image = fileImage;
-	}
-
-	public Category getCategory() {
-		return category;
-	}
-
-	public void setCategory(Category category) {
-		this.category = category;
-	}
-
-	public Brand getBrand() {
-		return brand;
-	}
-
-	public void setBrand(Brand brand) {
-		this.brand = brand;
+	public void setImages(Set<ProductImage> images) {
+		this.images = images;
 	}
 
 	public Set<Review> getReviews() {
@@ -178,10 +167,20 @@ public class Product {
 		this.createdDate = createdDate;
 	}
 
-	@Override
-	public String toString() {
-		return "Product [id=" + id + ", createdDate=" + createdDate + ", name=" + name + ", price=" + price
-				+ ", quantity=" + quantity + ", discount=" + discount + "]";
+	public EProductCategory getCategory() {
+		return category;
+	}
+
+	public void setCategory(EProductCategory category) {
+		this.category = category;
+	}
+
+	public EProductBrand getBrand() {
+		return brand;
+	}
+
+	public void setBrand(EProductBrand brand) {
+		this.brand = brand;
 	}
 
 }

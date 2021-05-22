@@ -1,5 +1,7 @@
 package com.congnghejava.webbanhang.controllers;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,39 +19,45 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.method.annotation.MvcUriComponentsBuilder;
 
-import com.congnghejava.webbanhang.models.FileUpload;
+import com.congnghejava.webbanhang.payload.response.FileUploadResponse;
 import com.congnghejava.webbanhang.payload.response.MessageResponse;
-import com.congnghejava.webbanhang.services.FilesStorageServiceV2;
+import com.congnghejava.webbanhang.services.FilesStorageService;
 
 @Controller
 @RestController("/filesV2")
 public class FilesUploadController {
 	@Autowired
-	FilesStorageServiceV2 fileStorageService;
+	FilesStorageService fileStorageService;
 
 	@PostMapping("/upload")
-	public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) {
+	public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile[] files) {
 		try {
-			String message = "Uploaded the file successfully: " + file.getOriginalFilename();
-			fileStorageService.save(file);
+			List<String> filenames = new ArrayList<>();
+
+			Arrays.asList(files).stream().forEach(file -> {
+				fileStorageService.save(file);
+				filenames.add(file.getOriginalFilename());
+			});
+
+			String message = "Uploaded the file successfully: " + filenames;
 			return new ResponseEntity<>(new MessageResponse(message), HttpStatus.OK);
 		} catch (Exception e) {
-			String message = "Could not upload the file: " + file.getOriginalFilename() + "!";
+			String message = "Could not upload the file!";
 			return new ResponseEntity<>(new MessageResponse(message), HttpStatus.EXPECTATION_FAILED);
 		}
 	}
 
 	@GetMapping
 	public ResponseEntity<?> getListFiles() {
-		List<FileUpload> files = fileStorageService.loadAll().map(path -> {
+		List<FileUploadResponse> filesResponse = fileStorageService.loadAll().map(path -> {
 			String filename = path.getFileName().toString();
 			String url = MvcUriComponentsBuilder
 					.fromMethodName(FilesUploadController.class, "getFile", path.getFileName().toString()).build()
 					.toString();
-			return new FileUpload(filename, url);
+			return new FileUploadResponse(filename, url);
 		}).collect(Collectors.toList());
 
-		return new ResponseEntity<>(files, HttpStatus.OK);
+		return new ResponseEntity<>(filesResponse, HttpStatus.OK);
 	}
 
 	@GetMapping("/{filename:.+}")
