@@ -28,17 +28,24 @@ import com.congnghejava.webbanhang.payload.request.LoginRequest;
 import com.congnghejava.webbanhang.payload.request.SignupRequest;
 import com.congnghejava.webbanhang.payload.response.ApiResponse;
 import com.congnghejava.webbanhang.payload.response.AuthResponse;
+import com.congnghejava.webbanhang.repository.RoleRepository;
 import com.congnghejava.webbanhang.repository.UserCredentialRepository;
 import com.congnghejava.webbanhang.security.jwtToken.TokenProvider;
+import com.congnghejava.webbanhang.utils.UrlImageUtils;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
+	UrlImageUtils urlImageUtils = new UrlImageUtils();
+
 	@Autowired
 	AuthenticationManager authenticationManager;
 
 	@Autowired
 	UserCredentialRepository userCredentialRepository;
+
+	@Autowired
+	RoleRepository RoleRepository;
 
 	@Autowired
 	PasswordEncoder passwordEncoder;
@@ -64,10 +71,14 @@ public class AuthController {
 			throw new BadRequestException("Email address already in use.");
 		}
 
+		String name = signupRequest.getName();
 		UserCredential user = new UserCredential(signupRequest.getEmail(),
 				passwordEncoder.encode(signupRequest.getPassword()), AuthProvider.local);
 
-		user.setRoles(new HashSet<>(Arrays.asList(new Role(ERole.ROLE_USER))));
+		Role roleUser = RoleRepository.findByName(ERole.ROLE_USER).get();
+		user.setRoles(new HashSet<>(Arrays.asList(roleUser)));
+		user.getUser().setName(name);
+		user.getUser().setAvatarUrl(urlImageUtils.buildPathWithName("default-avatar.png"));
 
 		URI location = ServletUriComponentsBuilder.fromCurrentContextPath().path("user/me").buildAndExpand(user.getId())
 				.toUri();

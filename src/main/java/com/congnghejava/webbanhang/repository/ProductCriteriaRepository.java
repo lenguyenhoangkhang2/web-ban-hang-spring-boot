@@ -45,8 +45,8 @@ public class ProductCriteriaRepository {
 		setOrder(productPage, criteriaQuery, productRoot);
 
 		TypedQuery<Product> typedQuery = entityManager.createQuery(criteriaQuery);
-		typedQuery.setFirstResult(productPage.getPageNumber() * productPage.getPageSize());
-		typedQuery.setMaxResults(productPage.getPageSize());
+		typedQuery.setFirstResult(productPage.getPage() * productPage.getSize());
+		typedQuery.setMaxResults(productPage.getSize());
 
 		Pageable pageable = getPageable(productPage);
 		long productCount = getProductCount(predicate);
@@ -65,13 +65,13 @@ public class ProductCriteriaRepository {
 	}
 
 	private Pageable getPageable(ProductPage productPage) {
-		Sort sort = Sort.by(productPage.getSorDirection(), productPage.getSortBy());
-		return PageRequest.of(productPage.getPageNumber(), productPage.getPageSize(), sort);
+		Sort sort = Sort.by(productPage.getSortDirection(), productPage.getSortBy());
+		return PageRequest.of(productPage.getPage(), productPage.getSize(), sort);
 
 	}
 
 	private void setOrder(ProductPage productPage, CriteriaQuery<Product> criteriaQuery, Root<Product> productRoot) {
-		if (productPage.getSorDirection().equals(Sort.Direction.ASC)) {
+		if (productPage.getSortDirection().equals(Sort.Direction.ASC)) {
 			criteriaQuery.orderBy(criteriaBuilder.asc(productRoot.get(productPage.getSortBy())));
 		} else {
 			criteriaQuery.orderBy(criteriaBuilder.desc(productRoot.get(productPage.getSortBy())));

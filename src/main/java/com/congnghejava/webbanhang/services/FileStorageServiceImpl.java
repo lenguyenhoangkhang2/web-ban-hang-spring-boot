@@ -40,6 +40,7 @@ public class FileStorageServiceImpl implements FilesStorageService {
 		UUID uuid = UUID.randomUUID();
 		try {
 			String fileName = uuid.toString() + "_" + file.getOriginalFilename();
+
 			Files.copy(file.getInputStream(), root.resolve(fileName));
 			return fileName;
 		} catch (Exception e) {

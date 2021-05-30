@@ -24,6 +24,8 @@ public class Cart {
 	@JoinColumn(name = "product_id")
 	private Product product;
 
+	private Boolean enable;
+
 	@Column(name = "quantity")
 	private int quantity;
 
@@ -31,10 +33,11 @@ public class Cart {
 
 	}
 
-	public Cart(User user, Product product, int quantity) {
+	public Cart(User user, Product product, int quantity, Boolean enable) {
 		this.user = user;
 		this.product = product;
 		this.quantity = quantity;
+		this.enable = enable;
 	}
 
 	public Long getId() {
@@ -65,7 +68,20 @@ public class Cart {
 		return quantity;
 	}
 
+	public Boolean getEnable() {
+		return enable;
+	}
+
+	public void setEnable(Boolean enable) {
+		this.enable = enable;
+	}
+
+	public void setQuantity(int quantity) {
+		this.quantity = quantity;
+	}
+
 	public long getTotal() {
-		return (long) product.getPrice() * (100 - product.getDiscount()) / 100 * quantity;
+		return Math.round(Double.valueOf(product.getPrice() * (100 - product.getDiscount()) / 100) / 10000) * 10000
+				* quantity;
 	}
 }

@@ -18,10 +18,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.congnghejava.webbanhang.models.Category;
+import com.congnghejava.webbanhang.models.EProductCategory;
 import com.congnghejava.webbanhang.payload.request.CategoryRequest;
 import com.congnghejava.webbanhang.payload.response.CategoryResponse;
 import com.congnghejava.webbanhang.payload.response.MessageResponse;
@@ -42,13 +42,6 @@ public class CategoryController {
 		return new ResponseEntity<>(categories, HttpStatus.OK);
 	}
 
-	@GetMapping(params = "query")
-	public ResponseEntity<?> getByCategoryName(@RequestParam(value = "query") String catName) {
-		List<CategoryResponse> categories = categoryService.findByCategoryName(catName).stream()
-				.map(category -> new CategoryResponse(category)).collect(Collectors.toList());
-		return new ResponseEntity<>(categories, HttpStatus.OK);
-	}
-
 	@GetMapping("/{id}")
 	public ResponseEntity<?> getCategory(@PathVariable Long id) {
 		Category category = categoryService.findById(id).get();
@@ -58,30 +51,37 @@ public class CategoryController {
 	@PostMapping
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<?> createNewCategory(@Valid @RequestBody CategoryRequest categoryRequest) {
-		if (categoryService.existsCategoryName(categoryRequest.getName())) {
+		EProductCategory categoryName = EProductCategory.valueOf(categoryRequest.getName());
+
+		if (categoryService.existsCategoryName(categoryName.toString())) {
 			return ResponseEntity.badRequest().body(new MessageResponse("That category already exists"));
 		}
 
-		Category category = new Category(categoryRequest.getName());
+		Category category = new Category(EProductCategory.valueOf(categoryRequest.getName()));
 		categoryService.save(category);
 
 		return new ResponseEntity<>(new MessageResponse("Add category '" + category.getName() + "' successfully!"),
 				HttpStatus.OK);
 	}
 
+	// @formatter:off
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<?> updateCategory(@PathVariable Long id,
-			@Valid @RequestBody CategoryRequest categoryRequest) {
-		if (categoryService.existsCategoryName(categoryRequest.getName())) {
+											@Valid @RequestBody CategoryRequest categoryRequest) {
+	// @formatter:on
+
+		EProductCategory categoryName = EProductCategory.valueOf(categoryRequest.getName());
+
+		if (categoryService.existsCategoryName(categoryName.toString())) {
 			return ResponseEntity.badRequest().body(new MessageResponse("That category already exists"));
 		}
 
 		Optional<Category> categoryOptional = categoryService.findById(id);
 
 		return categoryOptional.map(oldCategory -> {
-			Category category = new Category(categoryRequest.getName());
-			String oldCategoryName = oldCategory.getName();
+			Category category = new Category(categoryName);
+			String oldCategoryName = oldCategory.getName().toString();
 
 			category.setId(oldCategory.getId());
 			categoryService.save(category);

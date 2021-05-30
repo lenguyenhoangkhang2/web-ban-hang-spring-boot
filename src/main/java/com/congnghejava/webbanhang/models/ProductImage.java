@@ -29,6 +29,10 @@ public class ProductImage {
 	@JoinColumn(name = "product_id", nullable = false)
 	private Product product;
 
+	public ProductImage() {
+
+	}
+
 	public ProductImage(EProductImageTypeDisplay type, String name, Product product) {
 		this.type = type;
 		this.name = name;

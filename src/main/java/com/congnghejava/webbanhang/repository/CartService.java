@@ -18,8 +18,12 @@ public class CartService {
 		return cartRepository.findById(id).get();
 	}
 
-	public List<Cart> findAllByUser(User user) {
-		return cartRepository.findAllByUser(user);
+	public List<Cart> findByUser(User user) {
+		return cartRepository.findByUser(user);
+	}
+
+	public List<Cart> findByUserAndEnable(User user, Boolean enable) {
+		return cartRepository.findByUserAndEnable(user, enable);
 	}
 
 	public boolean existsByProductAndUser(Product product, User user) {

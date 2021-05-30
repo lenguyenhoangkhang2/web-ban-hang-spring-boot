@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import com.congnghejava.webbanhang.models.Brand;
 import com.congnghejava.webbanhang.models.Category;
-import com.congnghejava.webbanhang.models.EProductCategory;
 import com.congnghejava.webbanhang.models.Product;
 import com.congnghejava.webbanhang.models.ProductPage;
 import com.congnghejava.webbanhang.models.ProductSearchCriteria;
@@ -28,12 +27,6 @@ public class ProductService {
 
 	@Autowired
 	FileStorageServiceImpl fileStorageServiceImpl;
-
-	@Autowired
-	SmartPhoneDetailsServiceImpl smartPhoneDetailsService;
-
-	@Autowired
-	LaptopDetailsServiceImpl laptopDetailsService;
 
 	public List<Product> findAll() {
 		return productRepository.findAll();
@@ -66,16 +59,4 @@ public class ProductService {
 		productRepository.deleteById(theId);
 	}
 
-	public Object getDetails(Product product) {
-
-		EProductCategory productType = product.getProductType();
-		switch (productType) {
-		case Laptop:
-			return laptopDetailsService.findByProduct(product);
-		case SmartPhone:
-			return smartPhoneDetailsService.findByProduct(product);
-		default:
-			return null;
-		}
-	}
 }

@@ -14,11 +14,14 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
+import com.congnghejava.webbanhang.payload.response.MessageResponse;
+import com.stripe.exception.InvalidRequestException;
+
 @RestControllerAdvice
 public class ControllerExceptionHandler {
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	@ResponseStatus(value = HttpStatus.BAD_REQUEST)
-	public ErrorMessage handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
+	@ResponseStatus(HttpStatus.BAD_REQUEST)
+	public ResponseEntity<?> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
 		List<String> errors = new ArrayList<String>();
 
 		for (FieldError error : ex.getBindingResult().getFieldErrors()) {
@@ -28,20 +31,29 @@ public class ControllerExceptionHandler {
 			errors.add(error.getObjectName() + ": " + error.getDefaultMessage());
 		}
 
-		return new ErrorMessage(HttpStatus.BAD_REQUEST.value(), ex.getMessage(), errors);
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
 
 	}
 
 	@ExceptionHandler(MaxUploadSizeExceededException.class)
-	@ResponseStatus(value = HttpStatus.EXPECTATION_FAILED)
+	@ResponseStatus(HttpStatus.EXPECTATION_FAILED)
 	public ErrorMessage handleMaxSizeException(MaxUploadSizeExceededException ex) {
-		return new ErrorMessage(HttpStatus.EXPECTATION_FAILED.value(), ex.getMessage(),
-				"File is larger " + ex.getMaxUploadSize());
+		return new ErrorMessage(HttpStatus.EXPECTATION_FAILED.value(), "File is larger " + ex.getMaxUploadSize());
 	}
 
 	@ExceptionHandler(NoSuchElementException.class)
-	@ResponseStatus(value = HttpStatus.NOT_FOUND)
-	public ResponseEntity<?> handleNoSuchElementException(NoSuchElementException ex) {
-		return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public ErrorMessage handleNoSuchElementException(NoSuchElementException ex) {
+		return new ErrorMessage(HttpStatus.NOT_FOUND.value(), ex.getLocalizedMessage());
+	}
+
+	@ExceptionHandler(InvalidRequestException.class)
+	public ResponseEntity<?> handleAmountExceed() {
+		return ResponseEntity.badRequest().body(new MessageResponse("Stripe chỉ nhận thanh toán dưới 100 triệu đồng!"));
+	}
+
+	@ExceptionHandler(BadRequestException.class)
+	public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
+		return ResponseEntity.badRequest().body(ex.getMessage());
 	}
 }

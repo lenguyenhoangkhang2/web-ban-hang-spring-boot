@@ -11,7 +11,9 @@ import com.congnghejava.webbanhang.models.User;
 
 @Repository
 public interface CartRepository extends JpaRepository<Cart, Long> {
-	public List<Cart> findAllByUser(User user);
+	public List<Cart> findByUser(User user);
+
+	public List<Cart> findByUserAndEnable(User user, Boolean enable);
 
 	public boolean existsByProductAndUser(Product product, User user);
 }

@@ -18,14 +18,14 @@ public class ProductImageServiceImpl implements ProductImageService {
 	ProductImageRepository productImageRepository;
 
 	@Autowired
-	FilesStorageService filesSrorageService;
+	FileStorageServiceImpl filesSrorageService;
 
 	@Override
 	public void deleteByProduct(Product product) {
 		productImageRepository.findByProduct(product).stream().forEach(image -> {
 			filesSrorageService.delete(image.getName());
+			productImageRepository.delete(image);
 		});
-		productImageRepository.deleteByProduct(product);
 	}
 
 	@Override
@@ -37,8 +37,8 @@ public class ProductImageServiceImpl implements ProductImageService {
 	public void deleteByProductAndType(Product product, EProductImageTypeDisplay typeImage) {
 		productImageRepository.findByProductAndType(product, typeImage).stream().forEach(image -> {
 			filesSrorageService.delete(image.getName());
+			productImageRepository.delete(image);
 		});
-		productImageRepository.deleteByProductAndType(product, typeImage);
 	}
 
 	@Override

@@ -8,7 +8,7 @@ public class BrandResponse {
 
 	public BrandResponse(Brand brand) {
 		this.id = brand.getId();
-		this.name = brand.getName();
+		this.name = brand.getName().toString();
 	}
 
 	public Long getId() {

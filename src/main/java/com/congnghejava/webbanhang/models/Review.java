@@ -30,23 +30,24 @@ public class Review {
 	private User user;
 
 	@Column(name = "rating")
-	private int rating;
+	private float rating;
 
 	@Column(name = "comment")
 	private String comment;
 
 	@Column(name = "time")
-	@Temporal(TemporalType.DATE)
-	private Date date;
+	@Temporal(TemporalType.TIMESTAMP)
+	private Date time;
 
 	public Review() {
 	}
 
-	public Review(int rating, String comment, User user) {
+	public Review(float rating, String comment, Product product, User user) {
 		this.rating = rating;
 		this.comment = comment;
-		this.date = new Date();
+		this.time = new Date();
 		this.user = user;
+		this.product = product;
 	}
 
 	public int getId() {
@@ -73,11 +74,11 @@ public class Review {
 		this.user = user;
 	}
 
-	public int getRating() {
+	public float getRating() {
 		return rating;
 	}
 
-	public void setRating(int rating) {
+	public void setRating(float rating) {
 		this.rating = rating;
 	}
 
@@ -89,12 +90,12 @@ public class Review {
 		this.comment = comment;
 	}
 
-	public Date getDate() {
-		return date;
+	public Date getTime() {
+		return time;
 	}
 
-	public void setDate(Date date) {
-		this.date = date;
+	public void getTime(Date date) {
+		this.time = date;
 	}
 
 }

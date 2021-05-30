@@ -91,6 +91,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			.antMatchers("/","/error","/favicon.ico","/**/*.png","/**/*.gif","/**/*.svg","/**/*.jpg","/**/*.html","/**/*.css","/**/*.js").permitAll()
 			.antMatchers("/auth/**", "/test/**","/h2/**","/files/**").permitAll()
 			.antMatchers(HttpMethod.GET, "/products/**", "/brands/**", "/categories/**").permitAll()
+			.antMatchers(HttpMethod.POST, "/payment/stripe/*").permitAll()
 			.anyRequest().authenticated()
 			.and()
 		.oauth2Login()

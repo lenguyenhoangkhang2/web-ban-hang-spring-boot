@@ -1,49 +1,68 @@
 package com.congnghejava.webbanhang.payload.response;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
-import org.springframework.beans.factory.annotation.Autowired;
-
+import com.congnghejava.webbanhang.models.EProductCategory;
 import com.congnghejava.webbanhang.models.Product;
-import com.congnghejava.webbanhang.services.ProductService;
+import com.congnghejava.webbanhang.models.Review;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
+@JsonInclude(Include.NON_NULL)
 public class ProductResponse {
 
-	@Autowired
-	ProductService productService;
-
 	private Long id;
-	private String type;
 	private String name;
 	private String description;
-	private String brandName;
 	private String categoryName;
+	private String brandName;
 	private int price;
 	private int discount;
 	private int quantity;
+	private Double rating;
+	private int reviewCount;
 	private Long userId;
 	private Date createdDate;
-	private ProductImageResponse imageUrls;
+	private List<ProductImageResponse> images;
 	private Object details;
 
 	public ProductResponse() {
 	}
 
 	public ProductResponse(Product product) {
+		System.out.println(product.getReviews());
 		this.id = product.getId();
 		this.userId = product.getUser().getId();
-		this.type = product.getProductType().toString();
 		this.name = product.getName();
 		this.description = product.getDescription();
-		this.brandName = product.getBrand().getName();
-		this.categoryName = product.getCategory().getName();
+		this.brandName = product.getBrand().getName().toString();
+		this.categoryName = product.getCategory().getName().toString();
 		this.price = product.getPrice();
 		this.discount = product.getDiscount();
 		this.quantity = product.getQuantity();
-		this.imageUrls = new ProductImageResponse(product);
 		this.createdDate = product.getCreatedDate();
-		this.details = productService.getDetails(product);
+		this.reviewCount = product.getReviews().size();
+		if (reviewCount > 0) {
+			this.rating = Math
+					.ceil(product.getReviews().stream().mapToDouble(Review::getRating).average().getAsDouble() * 2) / 2;
+		}
+
+		EProductCategory category = EProductCategory.valueOf(product.getCategory().getName());
+		switch (category) {
+		case Laptop:
+			this.details = new LaptopDetailsResponse(product.getDetails());
+			break;
+		case SmartPhone:
+			this.details = new SmartPhoneDetailsResponse(product.getDetails());
+		default:
+			break;
+		}
+
+		this.images = product.getImages().stream().map(productImage -> new ProductImageResponse(productImage))
+				.collect(Collectors.toList());
 	}
 
 	public Long getId() {
@@ -126,20 +145,16 @@ public class ProductResponse {
 		this.createdDate = createdDate;
 	}
 
-	public ProductImageResponse getImageUrls() {
-		return imageUrls;
+	public List<ProductImageResponse> getImages() {
+		return images;
 	}
 
-	public void setImageUrls(ProductImageResponse imageUrls) {
-		this.imageUrls = imageUrls;
+	public void setImages(List<ProductImageResponse> images) {
+		this.images = images;
 	}
 
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
+	public void setDetails(Object details) {
+		this.details = details;
 	}
 
 	public Object getDetails() {
@@ -148,6 +163,22 @@ public class ProductResponse {
 
 	public void setDetails(Objects details) {
 		this.details = details;
+	}
+
+	public Double getRating() {
+		return rating;
+	}
+
+	public void setRating(Double rating) {
+		this.rating = rating;
+	}
+
+	public int getReviewCount() {
+		return reviewCount;
+	}
+
+	public void setReviewCount(int reviewCount) {
+		this.reviewCount = reviewCount;
 	}
 
 }

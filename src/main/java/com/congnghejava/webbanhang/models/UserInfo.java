@@ -1,43 +1,46 @@
 package com.congnghejava.webbanhang.models;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
 
 @Entity
-@Table(name = "address")
-public class Address {
+@Table(name = "user_info")
+public class UserInfo {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "country")
+	private String phone;
+
 	private String country;
 
-	@Column(name = "provine")
-	private String provine;
+	private String province;
 
-	@Column(name = "district")
 	private String district;
 
-	@Column(name = "detail")
 	private String detail;
 
-	@ManyToOne
-	@JoinColumn(name = "user_id")
+	@OneToOne(mappedBy = "userInfo")
 	private User user;
 
-	public Address(String country, String provine, String district, String detail, User user) {
+	public UserInfo() {
+		this.phone = "";
+		this.country = "";
+		this.province = "";
+		this.district = "";
+		this.detail = "";
+	}
+
+	public UserInfo(String phone, String country, String province, String district, String detail) {
+		this.phone = phone;
 		this.country = country;
-		this.provine = provine;
+		this.province = province;
 		this.district = district;
 		this.detail = detail;
-		this.user = user;
 	}
 
 	public Long getId() {
@@ -48,6 +51,14 @@ public class Address {
 		this.id = id;
 	}
 
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+
 	public String getCountry() {
 		return country;
 	}
@@ -56,12 +67,12 @@ public class Address {
 		this.country = country;
 	}
 
-	public String getProvine() {
-		return provine;
+	public String getProvince() {
+		return province;
 	}
 
-	public void setProvine(String provine) {
-		this.provine = provine;
+	public void setProvince(String province) {
+		this.province = province;
 	}
 
 	public String getDistrict() {
@@ -86,6 +97,10 @@ public class Address {
 
 	public void setUser(User user) {
 		this.user = user;
+	}
+
+	public boolean isFullfill() {
+		return !(phone.isEmpty() || country.isEmpty() || province.isEmpty() || district.isEmpty() || detail.isEmpty());
 	}
 
 }

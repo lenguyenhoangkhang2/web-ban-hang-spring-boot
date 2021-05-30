@@ -38,6 +38,14 @@ public class Order {
 	@Column(length = 20)
 	private EOrderStatus status;
 
+	private Boolean settled = false;
+
+	@Enumerated(EnumType.STRING)
+	@Column(name = "payment_method")
+	private EPaymentMethod paymentMethod;
+
+	private String stripeChagreId;
+
 	@Column(name = "created_date")
 	private Date createdDate;
 
@@ -55,6 +63,8 @@ public class Order {
 		this.status = EOrderStatus.Open;
 		this.createdDate = new Date();
 		this.updatedDate = new Date();
+		this.paymentMethod = EPaymentMethod.Cod;
+
 	}
 
 	public String getId() {
@@ -103,6 +113,42 @@ public class Order {
 
 	public void setUpdatedDate(Date updatedDate) {
 		this.updatedDate = updatedDate;
+	}
+
+	public boolean isSettled() {
+		return settled;
+	}
+
+	public void setSettled(boolean settled) {
+		this.settled = settled;
+	}
+
+	public Long getTotal() {
+		return orderItems.stream().mapToLong(OrderItem::getTotal).sum();
+	}
+
+	public Boolean getSettled() {
+		return settled;
+	}
+
+	public void setSettled(Boolean settled) {
+		this.settled = settled;
+	}
+
+	public EPaymentMethod getPaymentMethod() {
+		return paymentMethod;
+	}
+
+	public void setPaymentMethod(EPaymentMethod paymentMethod) {
+		this.paymentMethod = paymentMethod;
+	}
+
+	public String getStripeChagreId() {
+		return stripeChagreId;
+	}
+
+	public void setStripeChagreId(String stripeChagreId) {
+		this.stripeChagreId = stripeChagreId;
 	}
 
 }

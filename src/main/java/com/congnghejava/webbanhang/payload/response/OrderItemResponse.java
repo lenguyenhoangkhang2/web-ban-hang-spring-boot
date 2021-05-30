@@ -1,6 +1,7 @@
 package com.congnghejava.webbanhang.payload.response;
 
 public class OrderItemResponse {
+	private long productId;
 	private String productName;
 	private int price;
 	private int quantity;
@@ -43,6 +44,18 @@ public class OrderItemResponse {
 
 	public void setTotal(int total) {
 		this.total = total;
+	}
+
+	public void setTotal(long total) {
+		this.total = total;
+	}
+
+	public long getProductId() {
+		return productId;
+	}
+
+	public void setProductId(long productId) {
+		this.productId = productId;
 	}
 
 }

@@ -16,10 +16,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.congnghejava.webbanhang.models.Brand;
+import com.congnghejava.webbanhang.models.EProductBrand;
 import com.congnghejava.webbanhang.payload.request.BrandRequest;
 import com.congnghejava.webbanhang.payload.response.BrandResponse;
 import com.congnghejava.webbanhang.payload.response.MessageResponse;
@@ -40,13 +40,6 @@ public class BrandController {
 		return ResponseEntity.status(HttpStatus.OK).body(brandResponse);
 	}
 
-	@GetMapping(params = "query")
-	ResponseEntity<?> getAllBrand(@RequestParam(value = "query") String brandTerm) {
-		List<BrandResponse> brandResponse = brandService.findByBrandName(brandTerm).stream()
-				.map(brand -> new BrandResponse(brand)).collect(Collectors.toList());
-		return ResponseEntity.status(HttpStatus.OK).body(brandResponse);
-	}
-
 	@GetMapping("/{id}")
 	ResponseEntity<Brand> getBrand(@PathVariable Long id) {
 		Optional<Brand> brandOptional = brandService.findById(id);
@@ -58,11 +51,13 @@ public class BrandController {
 	@PostMapping
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	ResponseEntity<?> createNewCategory(@RequestBody BrandRequest brandRequest) {
-		if (brandService.existsBrandName(brandRequest.getName())) {
+		EProductBrand brandName = EProductBrand.valueOf(brandRequest.getName());
+
+		if (brandService.existsBrandName(brandName.toString())) {
 			return ResponseEntity.badRequest().body(new MessageResponse("That brand already exists"));
 		}
 
-		Brand brand = new Brand(brandRequest.getName());
+		Brand brand = new Brand(brandName);
 		brandService.save(brand);
 
 		return new ResponseEntity<>(new MessageResponse("Add brand '" + brand.getName() + "' successfully!"),
@@ -72,15 +67,17 @@ public class BrandController {
 	@PutMapping("/{id}")
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	ResponseEntity<?> updateBrand(@PathVariable Long id, @RequestBody BrandRequest brandRequest) {
-		if (brandService.existsBrandName(brandRequest.getName())) {
+		EProductBrand brandName = EProductBrand.valueOf(brandRequest.getName());
+
+		if (brandService.existsBrandName(brandName.toString())) {
 			return ResponseEntity.badRequest().body(new MessageResponse("That brand already exists"));
 		}
 
 		Optional<Brand> brandOptional = brandService.findById(id);
 
 		return brandOptional.map(oldBrand -> {
-			Brand brand = new Brand(brandRequest.getName());
-			String oldBrandName = oldBrand.getName();
+			Brand brand = new Brand(brandName);
+			String oldBrandName = oldBrand.getName().toString();
 
 			brand.setId(oldBrand.getId());
 			brandService.save(brand);

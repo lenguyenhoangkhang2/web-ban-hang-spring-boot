@@ -20,6 +20,9 @@ public class OrderItem {
 	@JoinColumn(name = "order_id", nullable = false)
 	private Order order;
 
+	@Column(name = "product_id")
+	private Long productId;
+
 	@Column(name = "product_name")
 	private String productName;
 
@@ -37,6 +40,7 @@ public class OrderItem {
 
 	public OrderItem(Order order, Cart cart) {
 		this.order = order;
+		this.productId = cart.getProduct().getId();
 		this.productName = cart.getProduct().getName();
 		this.price = cart.getProduct().getPrice();
 		this.quantity = cart.getQuantity();
@@ -88,6 +92,18 @@ public class OrderItem {
 	}
 
 	public void setTotal(int total) {
+		this.total = total;
+	}
+
+	public Long getProductId() {
+		return productId;
+	}
+
+	public void setProductId(Long productId) {
+		this.productId = productId;
+	}
+
+	public void setTotal(long total) {
 		this.total = total;
 	}
 

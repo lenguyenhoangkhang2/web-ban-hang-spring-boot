@@ -18,7 +18,4 @@ public interface ProductImageRepository extends JpaRepository<ProductImage, Long
 
 	public Optional<ProductImage> findFirstByProductAndType(Product product, EProductImageTypeDisplay type);
 
-	public void deleteByProduct(Product product);
-
-	public void deleteByProductAndType(Product product, EProductImageTypeDisplay type);
 }

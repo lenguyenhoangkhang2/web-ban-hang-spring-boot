@@ -10,6 +10,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.JoinColumn;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
@@ -33,8 +34,9 @@ public class User {
 	@Column(name = "name")
 	private String name;
 
-	@OneToMany(mappedBy = "user")
-	private Set<Address> address = new HashSet<>();
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "user_info_id")
+	private UserInfo userInfo = new UserInfo();
 
 	@OneToMany(mappedBy = "user", cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
 			CascadeType.REFRESH })
@@ -76,12 +78,12 @@ public class User {
 		this.name = name;
 	}
 
-	public Set<Address> getAddress() {
-		return address;
+	public UserInfo getUserInfo() {
+		return userInfo;
 	}
 
-	public void setAddress(Set<Address> address) {
-		this.address = address;
+	public void setUserInfo(UserInfo userInfo) {
+		this.userInfo = userInfo;
 	}
 
 	public Set<Product> getProducts() {

@@ -39,7 +39,7 @@ public class CategoryServiceImpl implements CategoryService {
 		return categoryRepository.existsByNameIgnoreCase(name);
 	}
 
-	public List<Category> findByCategoryName(String name) {
-		return categoryRepository.findByNameContainingIgnoreCase(name);
+	public Category findFirstByCategoryName(String name) {
+		return categoryRepository.findFirstByNameContainingIgnoreCase(name);
 	}
 }

@@ -7,8 +7,6 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -16,7 +14,10 @@ import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
 import javax.persistence.Table;
+
+import com.congnghejava.webbanhang.utils.UrlImageUtils;
 
 @Entity
 @Table(name = "products")
@@ -29,13 +30,13 @@ public class Product {
 	@JoinColumn(name = "user_id")
 	private User user;
 
-	@Enumerated(EnumType.STRING)
-	@Column(name = "category")
-	private EProductCategory category;
+	@ManyToOne
+	@JoinColumn(name = "category_id")
+	private Category category;
 
-	@Enumerated(EnumType.STRING)
-	@Column(name = "brand")
-	private EProductBrand brand;
+	@ManyToOne
+	@JoinColumn(name = "brand_id")
+	private Brand brand;
 
 	@Column(name = "created_date")
 	private Date createdDate = new Date();
@@ -55,6 +56,10 @@ public class Product {
 	@Column(name = "discount")
 	private int discount;
 
+	@OneToOne(cascade = CascadeType.ALL)
+	@JoinColumn(name = "product_details_id")
+	private ProductDetails details;
+
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "product")
 	private Set<ProductImage> images = new HashSet<>();
 
@@ -67,11 +72,12 @@ public class Product {
 	// @formatter:off
 	public Product(String name, 
 				   String description, 
-				   EProductCategory category, 
-				   EProductBrand brand, 
+				   Category category, 
+				   Brand brand, 
 				   int price,
 				   int quantity, 
-				   int discount) {
+				   int discount,
+				   ProductDetails details) {
 		this.name = name;
 		this.description = description;
 		this.category = category;
@@ -79,6 +85,7 @@ public class Product {
 		this.price = price;
 		this.quantity = quantity;
 		this.discount = discount;
+		this.details = details;
 	}
 	// @formatter:on
 
@@ -154,11 +161,6 @@ public class Product {
 		this.discount = discount;
 	}
 
-	public void addReview(Review tempReview) {
-		reviews.add(tempReview);
-		tempReview.setProduct(this);
-	}
-
 	public Date getCreatedDate() {
 		return createdDate;
 	}
@@ -167,20 +169,36 @@ public class Product {
 		this.createdDate = createdDate;
 	}
 
-	public EProductCategory getCategory() {
+	public Category getCategory() {
 		return category;
 	}
 
-	public void setCategory(EProductCategory category) {
+	public void setCategory(Category category) {
 		this.category = category;
 	}
 
-	public EProductBrand getBrand() {
+	public Brand getBrand() {
 		return brand;
 	}
 
-	public void setBrand(EProductBrand brand) {
+	public void setBrand(Brand brand) {
 		this.brand = brand;
+	}
+
+	public ProductDetails getDetails() {
+		return details;
+	}
+
+	public void setDetails(ProductDetails details) {
+		this.details = details;
+	}
+
+	public String getUrlOfficalImage() {
+		UrlImageUtils urlImageUtils = new UrlImageUtils();
+		ProductImage imageOfficial = images.stream()
+				.filter(image -> image.getType() == EProductImageTypeDisplay.Official).findAny().orElseGet(null);
+
+		return urlImageUtils.buildPathWithName(imageOfficial.getName());
 	}
 
 }

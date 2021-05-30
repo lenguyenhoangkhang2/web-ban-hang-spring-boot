@@ -6,7 +6,9 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.congnghejava.webbanhang.models.Product;
 import com.congnghejava.webbanhang.models.Review;
+import com.congnghejava.webbanhang.models.User;
 import com.congnghejava.webbanhang.repository.ReviewRepository;
 
 @Service
@@ -33,6 +35,21 @@ public class ReviewServiceImpl implements ReviewService {
 	@Override
 	public void remove(Long theId) {
 		reviewRepository.deleteById(theId);
+	}
+
+	@Override
+	public List<Review> findByProduct(Product product) {
+		return reviewRepository.findByProduct(product);
+	}
+
+	@Override
+	public boolean existsByUserAndProduct(User user, Product product) {
+		return reviewRepository.existsByUserAndProduct(user, product);
+	}
+
+	@Override
+	public Review findByUser(User user) {
+		return reviewRepository.findByUser(user);
 	}
 
 }

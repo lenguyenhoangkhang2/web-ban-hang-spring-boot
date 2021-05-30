@@ -2,19 +2,17 @@ package com.congnghejava.webbanhang.payload.response;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import com.congnghejava.webbanhang.models.Cart;
 import com.congnghejava.webbanhang.models.EProductImageTypeDisplay;
 import com.congnghejava.webbanhang.models.ProductImage;
-import com.congnghejava.webbanhang.services.ProductImageServiceImpl;
 
 public class CartResponse {
-	@Autowired
-	ProductImageServiceImpl productImageService;
 
 	private Long cartId;
+
+	private Boolean enable;
 
 	private String productImageUrl;
 
@@ -22,27 +20,40 @@ public class CartResponse {
 
 	private int quantity;
 
-	private long total;
+	private int productPrice;
+
+	private int productDiscount;
 
 	public CartResponse(Cart cart) {
-		Optional<ProductImage> image = productImageService.findFirstByProductAndType(cart.getProduct(),
-				EProductImageTypeDisplay.Official);
-		if (image.isPresent()) {
+		Optional<ProductImage> productImageOfficial = cart.getProduct().getImages().stream()
+				.filter(image -> image.getType() == EProductImageTypeDisplay.Official).findAny();
+
+		if (productImageOfficial.isPresent()) {
 			this.productImageUrl = ServletUriComponentsBuilder.fromCurrentContextPath().path("/files/")
-					.path(image.get().getName()).toUriString();
+					.path(productImageOfficial.get().getName()).toUriString();
 		}
 
 		this.cartId = cart.getId();
 		this.productName = cart.getProduct().getName();
 		this.quantity = cart.getQuantity();
-		this.total = cart.getTotal();
+		this.productPrice = cart.getProduct().getPrice();
+		this.productDiscount = cart.getProduct().getDiscount();
+		this.enable = cart.getEnable();
 	}
 
-	public String getProductImage() {
+	public Long getCartId() {
+		return cartId;
+	}
+
+	public void setCartId(Long cartId) {
+		this.cartId = cartId;
+	}
+
+	public String getProductImageUrl() {
 		return productImageUrl;
 	}
 
-	public void setProductImage(String productImageUrl) {
+	public void setProductImageUrl(String productImageUrl) {
 		this.productImageUrl = productImageUrl;
 	}
 
@@ -62,32 +73,28 @@ public class CartResponse {
 		this.quantity = quantity;
 	}
 
-	public long getTotal() {
-		return total;
+	public int getProductPrice() {
+		return productPrice;
 	}
 
-	public void setTotal(int total) {
-		this.total = total;
+	public void setProductPrice(int productPrice) {
+		this.productPrice = productPrice;
 	}
 
-	public Long getCartId() {
-		return cartId;
+	public int getProductDiscount() {
+		return productDiscount;
 	}
 
-	public void setCartId(Long cartId) {
-		this.cartId = cartId;
+	public void setProductDiscount(int productDiscount) {
+		this.productDiscount = productDiscount;
 	}
 
-	public String getProductImageUrl() {
-		return productImageUrl;
+	public Boolean isEnable() {
+		return enable;
 	}
 
-	public void setProductImageUrl(String productImageUrl) {
-		this.productImageUrl = productImageUrl;
-	}
-
-	public void setTotal(long total) {
-		this.total = total;
+	public void setEnable(Boolean enable) {
+		this.enable = enable;
 	}
 
 }

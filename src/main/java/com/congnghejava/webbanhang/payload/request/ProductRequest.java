@@ -6,20 +6,17 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 
 public class ProductRequest {
-	@NotEmpty(message = "Product type is required")
-	private String type;
-
 	@NotEmpty(message = "Product name is required")
 	private String name;
 
 	@NotEmpty(message = "Description name is required")
 	private String description;
 
-	@NotNull(message = "Category name is required")
-	private Long categoryId;
+	@NotEmpty(message = "Category name is required")
+	private String categoryName;
 
-	@NotNull(message = "Brand name is required")
-	private Long brandId;
+	@NotEmpty(message = "Brand name is required")
+	private String brandName;
 
 	@NotNull(message = "Price is required")
 	@Min(value = 0, message = "Price must be greater than 0")
@@ -62,6 +59,8 @@ public class ProductRequest {
 
 	private String design;
 
+	private String graphicsCard;
+
 	public String getName() {
 		return name;
 	}
@@ -78,20 +77,20 @@ public class ProductRequest {
 		this.description = description;
 	}
 
-	public Long getCategoryId() {
-		return categoryId;
+	public String getCategoryName() {
+		return categoryName;
 	}
 
-	public void setCategoryId(Long categoryId) {
-		this.categoryId = categoryId;
+	public void setCategoryName(String categoryName) {
+		this.categoryName = categoryName;
 	}
 
-	public Long getBrandId() {
-		return brandId;
+	public String getBrandName() {
+		return brandName;
 	}
 
-	public void setBrandId(Long brandId) {
-		this.brandId = brandId;
+	public void setBrandName(String brandName) {
+		this.brandName = brandName;
 	}
 
 	public int getPrice() {
@@ -116,14 +115,6 @@ public class ProductRequest {
 
 	public void setDiscount(int discount) {
 		this.discount = discount;
-	}
-
-	public String getType() {
-		return type;
-	}
-
-	public void setType(String type) {
-		this.type = type;
 	}
 
 	public String getDisplay() {
@@ -236,6 +227,25 @@ public class ProductRequest {
 
 	public void setDesign(String design) {
 		this.design = design;
+	}
+
+	public String getGraphicsCard() {
+		return graphicsCard;
+	}
+
+	public void setGraphicsCard(String graphicsCard) {
+		this.graphicsCard = graphicsCard;
+	}
+
+	@Override
+	public String toString() {
+		return "ProductRequest [name=" + name + ", description=" + description + ", categoryName=" + categoryName
+				+ ", brandName=" + brandName + ", price=" + price + ", quantity=" + quantity + ", discount=" + discount
+				+ ", display=" + display + ", operatingSystem=" + operatingSystem + ", fontCamera=" + fontCamera
+				+ ", rearCamera=" + rearCamera + ", chipName=" + chipName + ", internalMemory=" + internalMemory
+				+ ", externalMemory=" + externalMemory + ", sim=" + sim + ", batteryCapacity=" + batteryCapacity
+				+ ", cpu=" + cpu + ", ram=" + ram + ", hardDrive=" + hardDrive + ", size=" + size + ", design=" + design
+				+ ", graphicsCard=" + graphicsCard + "]";
 	}
 
 }

@@ -4,7 +4,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import javax.persistence.CascadeType;
-import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -20,7 +19,6 @@ public class Brand {
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
-	@Column(name = "name")
 	private String name;
 
 	@OneToMany(fetch = FetchType.LAZY, mappedBy = "brand", cascade = CascadeType.ALL)
@@ -29,8 +27,8 @@ public class Brand {
 	public Brand() {
 	}
 
-	public Brand(String name) {
-		this.name = name;
+	public Brand(EProductBrand name) {
+		this.name = name.toString();
 	}
 
 	public Long getId() {

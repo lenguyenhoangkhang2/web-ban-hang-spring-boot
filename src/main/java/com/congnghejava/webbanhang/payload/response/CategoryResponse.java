@@ -8,7 +8,7 @@ public class CategoryResponse {
 
 	public CategoryResponse(Category category) {
 		this.id = category.getId();
-		this.name = category.getName();
+		this.name = category.getName().toString();
 	}
 
 	public Long getId() {

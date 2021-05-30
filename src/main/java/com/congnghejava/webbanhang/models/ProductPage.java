@@ -3,33 +3,38 @@ package com.congnghejava.webbanhang.models;
 import org.springframework.data.domain.Sort;
 
 public class ProductPage {
-	private int pageNumber = 0;
-	private int pageSize = 10;
-	private Sort.Direction sorDirection = Sort.Direction.ASC;
-	private String sortBy = "createdDate";
+	private int page = 0;
+	private int size = 10;
+	private Sort.Direction sortDirection;
+	private String sortBy;
 
-	public int getPageNumber() {
-		return pageNumber;
+	public int getPage() {
+		return page;
 	}
 
-	public void setPageNumber(int pageNumber) {
-		this.pageNumber = pageNumber;
+	public void setPage(int page) {
+		this.page = page;
 	}
 
-	public int getPageSize() {
-		return pageSize;
+	public int getSize() {
+		return size;
 	}
 
-	public void setPageSize(int pageSize) {
-		this.pageSize = pageSize;
+	public void setSize(int size) {
+		this.size = size;
 	}
 
-	public Sort.Direction getSorDirection() {
-		return sorDirection;
+	public Sort.Direction getSortDirection() {
+		return sortDirection;
 	}
 
-	public void setSorDirection(Sort.Direction sorDirection) {
-		this.sorDirection = sorDirection;
+	public void setSortDirection(String sortDirection) {
+		if (sortDirection.equals("asc")) {
+			this.sortDirection = Sort.Direction.ASC;
+		}
+		if (sortDirection.equals("desc")) {
+			this.sortDirection = Sort.Direction.DESC;
+		}
 	}
 
 	public String getSortBy() {
