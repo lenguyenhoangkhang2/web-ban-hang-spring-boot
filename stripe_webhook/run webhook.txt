@@ -1,1 +1,5 @@
 ./stripe.exe listen --skip-verify --forward-to https://localhost:8443/payment/stripe/webhooks
+
+or
+
+stripe.exe listen --skip-verify --forward-to https://localhost:8443/payment/stripe/webhooks

@@ -93,13 +93,20 @@ public class ProductCriteriaRepository {
 			predicates.add(criteriaBuilder.like(criteriaBuilder.upper(productRoot.get("category").get("name")),
 					"%" + productSearchCriteria.getCatorory().toUpperCase() + "%"));
 		}
+
 		if (Objects.nonNull(productSearchCriteria.getMaxPrice())) {
-			predicates.add(criteriaBuilder.lessThan(productRoot.get("price"), productSearchCriteria.getMaxPrice()));
+			predicates.add(
+					criteriaBuilder.lessThanOrEqualTo(productRoot.get("price"), productSearchCriteria.getMaxPrice()));
 		}
 		if (Objects.nonNull(productSearchCriteria.getMinPrice())) {
-			predicates.add(criteriaBuilder.greaterThan(productRoot.get("price"), productSearchCriteria.getMinPrice()));
+			predicates.add(criteriaBuilder.greaterThanOrEqualTo(productRoot.get("price"),
+					productSearchCriteria.getMinPrice()));
 		}
 		predicates.add(criteriaBuilder.greaterThan(productRoot.get("quantity"), 0));
 		return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+	}
+
+	public Long calPrice(Long price, Long discount) {
+		return Math.round(Double.valueOf(price * (100 - discount) / 100) / 10000) * 10000;
 	}
 }

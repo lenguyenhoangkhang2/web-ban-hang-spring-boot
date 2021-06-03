@@ -48,6 +48,7 @@ import com.congnghejava.webbanhang.payload.response.ReviewResponse;
 import com.congnghejava.webbanhang.security.CurrentUser;
 import com.congnghejava.webbanhang.security.UserPrincipal;
 import com.congnghejava.webbanhang.services.BrandServiceImpl;
+import com.congnghejava.webbanhang.services.CartService;
 import com.congnghejava.webbanhang.services.CategoryServiceImpl;
 import com.congnghejava.webbanhang.services.FileStorageServiceImpl;
 import com.congnghejava.webbanhang.services.ProductDetailsServiceImpl;
@@ -84,6 +85,9 @@ public class ProductController {
 
 	@Autowired
 	ReviewServiceImpl reviewService;
+
+	@Autowired
+	CartService cartService;
 
 	// @formatter:off
 	@GetMapping
@@ -247,10 +251,19 @@ public class ProductController {
 	@DeleteMapping("/{id}")
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
 	public ResponseEntity<?> deleteProduct(@PathVariable Long id) {
-		Product product = productService.findById(id);
-		productImageService.deleteByProduct(product);
-		productService.remove(id);
-		return ResponseEntity.status(HttpStatus.OK).body("Successfully deleted");
+		try {
+			Product product = productService.findById(id);
+			productImageService.deleteByProduct(product);
+			cartService.findByProduct(product).forEach(cart -> {
+				cartService.remove(cart.getId());
+			});
+			productService.remove(id);
+			return ResponseEntity.status(HttpStatus.OK).body("Successfully deleted");
+		} catch (Exception e) {
+			return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+					.body(new MessageResponse(e.getLocalizedMessage()));
+		}
+
 	}
 
 	@GetMapping("/category")

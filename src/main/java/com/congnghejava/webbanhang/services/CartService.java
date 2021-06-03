@@ -1,4 +1,4 @@
-package com.congnghejava.webbanhang.repository;
+package com.congnghejava.webbanhang.services;
 
 import java.util.List;
 
@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import com.congnghejava.webbanhang.models.Cart;
 import com.congnghejava.webbanhang.models.Product;
 import com.congnghejava.webbanhang.models.User;
+import com.congnghejava.webbanhang.repository.CartRepository;
 
 @Service
 public class CartService {
@@ -28,6 +29,10 @@ public class CartService {
 
 	public boolean existsByProductAndUser(Product product, User user) {
 		return cartRepository.existsByProductAndUser(product, user);
+	}
+
+	public List<Cart> findByProduct(Product product) {
+		return cartRepository.findByProduct(product);
 	}
 
 	public Cart save(Cart cart) {

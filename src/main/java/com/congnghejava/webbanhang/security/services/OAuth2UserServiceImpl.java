@@ -77,7 +77,7 @@ public class OAuth2UserServiceImpl extends DefaultOAuth2UserService {
 			if (!userCredential.getProvider()
 					.equals(AuthProvider.valueOf(oAuth2UserRequest.getClientRegistration().getRegistrationId()))) {
 				throw new OAuth2AuthenticationProcessingException(
-						"You're signed with your " + userCredential.getProvider() + " account!");
+						"You're signed with your " + userCredential.getEmail() + " email!");
 			}
 			userCredential = updateExistingUser(userCredential, oAuth2UserInfo);
 		} else {
