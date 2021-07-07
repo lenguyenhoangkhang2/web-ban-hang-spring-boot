@@ -1,6 +1,5 @@
 package com.congnghejava.webbanhang.models;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -8,6 +7,7 @@ import java.util.Set;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.EntityListeners;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.GeneratedValue;
@@ -18,10 +18,12 @@ import javax.persistence.OneToMany;
 import javax.persistence.Table;
 
 import org.hibernate.annotations.GenericGenerator;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
 @Table(name = "orders")
-public class Order {
+@EntityListeners(AuditingEntityListener.class)
+public class Order extends Auditable<Long> {
 	@Id
 	@GeneratedValue(generator = "uuid")
 	@GenericGenerator(name = "uuid", strategy = "uuid2")
@@ -46,12 +48,6 @@ public class Order {
 
 	private String stripeChagreId;
 
-	@Column(name = "created_date")
-	private Date createdDate;
-
-	@Column(name = "updated_date")
-	private Date updatedDate;
-
 	public Order() {
 	}
 
@@ -61,8 +57,6 @@ public class Order {
 			orderItems.add(new OrderItem(this, cart));
 		});
 		this.status = EOrderStatus.Open;
-		this.createdDate = new Date();
-		this.updatedDate = new Date();
 		this.paymentMethod = EPaymentMethod.Cod;
 
 	}
@@ -91,28 +85,12 @@ public class Order {
 		this.orderItems = orderItems;
 	}
 
-	public Date getCreatedDate() {
-		return createdDate;
-	}
-
-	public void setCreatedDate(Date createdDate) {
-		this.createdDate = createdDate;
-	}
-
 	public EOrderStatus getStatus() {
 		return status;
 	}
 
 	public void setStatus(EOrderStatus status) {
 		this.status = status;
-	}
-
-	public Date getUpdatedDate() {
-		return updatedDate;
-	}
-
-	public void setUpdatedDate(Date updatedDate) {
-		this.updatedDate = updatedDate;
 	}
 
 	public boolean isSettled() {

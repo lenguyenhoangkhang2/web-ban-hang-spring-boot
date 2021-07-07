@@ -81,7 +81,7 @@ public class Cart {
 	}
 
 	public long getTotal() {
-		return Math.round(Double.valueOf(product.getPrice() * (100 - product.getDiscount()) / 100) / 10000) * 10000
+		return Math.round(Double.valueOf(product.getPrice() * (1 - product.getDiscount() / 100)) / 10000) * 10000
 				* quantity;
 	}
 }

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Reset Password</title>
+</head>
+<body>
+	<h2>
+		<th:block th:switch="${order.status}">
+			<th:block th:case="'Open'">Đơn hàng đang được xử lý</th:block>
+			<th:block th:case="'Confirmed'">Đơn hàng đã được xác nhận</th:block>
+			<th:block th:case="'Shipping'">Đơn hàng đang được vận chuyển</th:block>
+			<th:block th:case="'Returned'">Đơn hàng chưa được nhận</th:block>
+			<th:block th:case="'Collected'">Đơn hàng đã được nhận</th:block>
+			<th:block th:case="'Canceled'">Đơn hàng đã hủy</th:block>
+		</th:block>
+	</h2>
+	<h3>Mã đơn hàng: <span th:text="${order.id}"></span></h3>
+	<table style="text-align: left; border: 1px solid black;border-collapse: collapse;">
+		<thead>
+	      <tr>
+	        <th style="border: 1px solid black;" >Tên sản phẩm</th>
+	        <th style="border: 1px solid black;" >Giá sản phẩm</th>
+	        <th style="border: 1px solid black;" >Giảm giá</th>
+	        <th style="border: 1px solid black;" >Số lượng</th>
+	        <th style="border: 1px solid black;" >Tổng</th>
+	      </tr>
+	    </thead>
+	    <tbody>
+	    	<tr th:each="item : ${order.items}">
+	    		<td style="border: 1px solid black;" th:text="${item.productName}"></td>
+	    		<td style="border: 1px solid black;"  th:text="${item.price.toString().replaceAll('/(\d)(?=(\d{3})+(?!\d))/', '$1,') + 'đ'}"></td>
+	    		<td style="border: 1px solid black;"  th:text="${item.discount == 0} ? 'không có' : '-' + ${item.discount} + '%'"></td>
+	    		<td style="border: 1px solid black;"  th:text="${item.quantity}"></td>
+	    		<td style="border: 1px solid black;"  th:text="${item.total} + 'đ'"></td>
+	    	</tr>
+	    	<tr>
+	    		<td  style="border: 1px solid black;text-align: right;"  colspan="5">
+	    			<strong>Tổng tiền: <span th:text="${order.total} + 'đ'"></span></strong>
+	    		</td>
+	    	</tr>
+	    </tbody>
+	</table>
+</body>
+</html>

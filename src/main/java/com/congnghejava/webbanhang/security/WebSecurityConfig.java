@@ -75,6 +75,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		// @formatter:off
 		http
+		.requiresChannel().anyRequest().requiresSecure()
+		.and()
 		.headers().frameOptions().disable()
 			.and()
 		.cors()
@@ -89,7 +91,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 			.and()
 		.authorizeRequests()
 			.antMatchers("/","/error","/favicon.ico","/**/*.png","/**/*.gif","/**/*.svg","/**/*.jpg","/**/*.html","/**/*.css","/**/*.js").permitAll()
-			.antMatchers("/auth/**", "/test/**","/h2/**","/files/**").permitAll()
+			.antMatchers("/auth/**", "/test/**","/h2/**","/files/**", "/header-images/**").permitAll()
 			.antMatchers(HttpMethod.GET, "/products/**", "/brands/**", "/categories/**").permitAll()
 			.antMatchers(HttpMethod.POST, "/payment/stripe/*").permitAll()
 			.anyRequest().authenticated()

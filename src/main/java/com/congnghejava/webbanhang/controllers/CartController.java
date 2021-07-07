@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -40,6 +41,7 @@ public class CartController {
 	ProductService productService;
 
 	@GetMapping
+	@PreAuthorize("hasRole('ROLE_USER')")
 	public ResponseEntity<?> getAllCart(@CurrentUser UserPrincipal userPrincipal) {
 		User user = userService.getCurrentUser(userPrincipal);
 		List<CartResponse> cartResponse = cartService.findByUser(user).stream().map(cart -> new CartResponse(cart))
@@ -49,6 +51,7 @@ public class CartController {
 	}
 
 	@PostMapping
+	@PreAuthorize("hasRole('ROLE_USER')")
 	public ResponseEntity<?> addCart(@RequestBody Long productId, @CurrentUser UserPrincipal userPrincipal) {
 		Product product = productService.findById(productId);
 
@@ -73,6 +76,7 @@ public class CartController {
 	}
 
 	@PutMapping("/{cartId}")
+	@PreAuthorize("hasRole('ROLE_USER')")
 	public ResponseEntity<?> updateQuantity(@PathVariable Long cartId, @RequestBody CartRequest cartRequest,
 			@CurrentUser UserPrincipal userPrincipal) {
 
@@ -80,10 +84,24 @@ public class CartController {
 		Product product = productService.findById(oldCart.getProduct().getId());
 		User user = userService.getCurrentUser(userPrincipal);
 
-		product.setQuantity(product.getQuantity() + oldCart.getQuantity() - cartRequest.getQuantity());
+		if (oldCart.getEnable() != cartRequest.getEnable()) {
+			if (cartRequest.getEnable()) {
+				if (product.getQuantity() < cartRequest.getQuantity()) {
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponse("Không đủ sản phẩm"));
+				}
+				product.setQuantity(product.getQuantity() - cartRequest.getQuantity());
+			} else {
+				product.setQuantity(product.getQuantity() + cartRequest.getQuantity());
+			}
+		}
 
-		if (product.getQuantity() < 0) {
-			return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponse("Không đủ sản phẩm"));
+		if (oldCart.getQuantity() != cartRequest.getQuantity() && oldCart.getEnable() == cartRequest.getEnable()) {
+			if (cartRequest.getEnable()) {
+				if (product.getQuantity() < (cartRequest.getQuantity() - oldCart.getQuantity())) {
+					return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponse("Không đủ sản phẩm"));
+				}
+				product.setQuantity(product.getQuantity() + oldCart.getQuantity() - cartRequest.getQuantity());
+			}
 		}
 
 		Cart cart = new Cart(user, product, cartRequest.getQuantity(), cartRequest.getEnable());
@@ -95,13 +113,16 @@ public class CartController {
 		return ResponseEntity.status(HttpStatus.OK).body("Cart item updated");
 	}
 
-	@DeleteMapping("/{id}")
-	public ResponseEntity<?> deleteCart(@PathVariable Long id) {
-		Cart cart = cartService.findById(id);
+	@DeleteMapping("/{cartId}")
+	@PreAuthorize("hasRole('ROLE_USER')")
+	public ResponseEntity<?> deleteCart(@PathVariable Long cartId) {
+		Cart cart = cartService.findById(cartId);
 		Product product = productService.findById(cart.getProduct().getId());
 
-		product.setQuantity(product.getQuantity() + cart.getQuantity());
-		cartService.remove(id);
+		if (cart.getEnable()) {
+			product.setQuantity(product.getQuantity() + cart.getQuantity());
+		}
+		cartService.remove(cartId);
 		productService.save(product);
 		return ResponseEntity.status(HttpStatus.OK)
 				.body(new MessageResponse("Đã xóa " + cart.getProduct().getName() + " khỏi giỏ hàng"));

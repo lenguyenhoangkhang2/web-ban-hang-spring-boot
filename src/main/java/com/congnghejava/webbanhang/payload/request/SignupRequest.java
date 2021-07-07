@@ -5,17 +5,18 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 
 public class SignupRequest {
+	@NotBlank(message = "Vui lòng nhập tên của bạn")
 	private String name;
 
-	@Email
-	@NotBlank
-	@Size(max = 50)
+	@Email(message = "Email không hợp lệ")
+	@NotBlank(message = "Vui lòng nhập email")
 	private String email;
 
-	@NotBlank
-	@Size(min = 6, max = 40)
+	@Size(min = 8, max = 20, message = "Nhập mật khẩu từ 8 đến 20 ký tự")
+	@NotBlank(message = "Vui lòng nhập mật khẩu")
 	private String password;
 
+	@NotBlank(message = "Vui lòng nhập mật khẩu xác nhận")
 	private String confirmPassword;
 
 	public String getEmail() {

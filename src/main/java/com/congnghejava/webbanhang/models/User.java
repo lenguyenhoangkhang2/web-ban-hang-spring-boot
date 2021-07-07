@@ -36,7 +36,7 @@ public class User {
 
 	@OneToOne(cascade = CascadeType.ALL)
 	@JoinColumn(name = "user_info_id")
-	private UserInfo userInfo = new UserInfo();
+	private UserContact userContact = new UserContact();
 
 	@OneToMany(mappedBy = "user", cascade = { CascadeType.DETACH, CascadeType.MERGE, CascadeType.PERSIST,
 			CascadeType.REFRESH })
@@ -78,12 +78,12 @@ public class User {
 		this.name = name;
 	}
 
-	public UserInfo getUserInfo() {
-		return userInfo;
+	public UserContact getUserInfo() {
+		return userContact;
 	}
 
-	public void setUserInfo(UserInfo userInfo) {
-		this.userInfo = userInfo;
+	public void setUserInfo(UserContact userContact) {
+		this.userContact = userContact;
 	}
 
 	public Set<Product> getProducts() {

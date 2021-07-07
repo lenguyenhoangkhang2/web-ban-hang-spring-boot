@@ -6,6 +6,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +31,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.congnghejava.webbanhang.exception.BadRequestException;
 import com.congnghejava.webbanhang.models.Brand;
 import com.congnghejava.webbanhang.models.Category;
 import com.congnghejava.webbanhang.models.EProductBrand;
@@ -37,7 +40,6 @@ import com.congnghejava.webbanhang.models.EProductImageTypeDisplay;
 import com.congnghejava.webbanhang.models.Product;
 import com.congnghejava.webbanhang.models.ProductDetails;
 import com.congnghejava.webbanhang.models.ProductPage;
-import com.congnghejava.webbanhang.models.ProductSearchCriteria;
 import com.congnghejava.webbanhang.models.Review;
 import com.congnghejava.webbanhang.models.User;
 import com.congnghejava.webbanhang.payload.request.ProductRequest;
@@ -45,6 +47,7 @@ import com.congnghejava.webbanhang.payload.request.ReviewRequest;
 import com.congnghejava.webbanhang.payload.response.MessageResponse;
 import com.congnghejava.webbanhang.payload.response.ProductResponse;
 import com.congnghejava.webbanhang.payload.response.ReviewResponse;
+import com.congnghejava.webbanhang.repository.criteria.ProductSearchCriteria;
 import com.congnghejava.webbanhang.security.CurrentUser;
 import com.congnghejava.webbanhang.security.UserPrincipal;
 import com.congnghejava.webbanhang.services.BrandServiceImpl;
@@ -91,7 +94,7 @@ public class ProductController {
 
 	// @formatter:off
 	@GetMapping
-	public ResponseEntity<?> getAllProduct(@RequestParam(value = "page") Optional<Integer> page,
+	public ResponseEntity<?> getProducts(@RequestParam(value = "page") Optional<Integer> page,
 										   @RequestParam(value = "size") Optional<Integer> size,
 										   @RequestParam(value = "sortDirection") Optional<String> sortDirection,
 										   @RequestParam(value = "sortBy") Optional<String> sortBy,
@@ -146,9 +149,8 @@ public class ProductController {
 	// @formatter:off
 	@PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
 	@PreAuthorize("hasRole('ROLE_ADMIN')")
-	public ResponseEntity<?> addProduct(@RequestPart("product") ProductRequest productRequest,
+	public ResponseEntity<?> addProduct(@Valid @RequestPart("product") ProductRequest productRequest,
 										@RequestPart("official") MultipartFile official, 
-										@RequestPart("banner") Optional<MultipartFile> banner,
 										@RequestPart("slider") MultipartFile[] slider, 
 										@CurrentUser UserPrincipal userPrincipal) {
 	// @formatter:on
@@ -171,10 +173,6 @@ public class ProductController {
 
 		try {
 			fileStorageService.saveImageForProduct(official, product, EProductImageTypeDisplay.Official);
-
-			if (banner.isPresent()) {
-				fileStorageService.saveImageForProduct(banner.get(), product, EProductImageTypeDisplay.Banner);
-			}
 
 			Arrays.asList(slider).stream().forEach(file -> {
 				fileStorageService.saveImageForProduct(file, product, EProductImageTypeDisplay.Slider);
@@ -230,11 +228,6 @@ public class ProductController {
 		if (Objects.nonNull(official)) {
 			productImageService.deleteByProductAndType(product, EProductImageTypeDisplay.Official);
 			fileStorageService.saveImageForProduct(official, product, EProductImageTypeDisplay.Official);
-		}
-
-		if (Objects.nonNull(banner)) {
-			productImageService.deleteByProductAndType(product, EProductImageTypeDisplay.Banner);
-			fileStorageService.saveImageForProduct(banner, product, EProductImageTypeDisplay.Banner);
 		}
 
 		if (Objects.nonNull(slider)) {
@@ -313,6 +306,10 @@ public class ProductController {
 	// @formatter:on
 		User user = userService.getCurrentUser(userPiPrincipal);
 		Product product = productService.findById(productId);
+
+		if (reviewService.existsByUserAndProduct(user, product)) {
+			throw new BadRequestException("Bạn đã bình luận sản phẩm này trước đó");
+		}
 
 		Review review = new Review(reviewRequest.getRating(), reviewRequest.getComment(), product, user);
 		reviewService.save(review);

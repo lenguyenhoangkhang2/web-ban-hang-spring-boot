@@ -29,6 +29,9 @@ public class OrderItem {
 	@Column(name = "price")
 	private int price;
 
+	@Column(name = "discount")
+	private int discount;
+
 	@Column(name = "quantity")
 	private int quantity;
 
@@ -43,6 +46,7 @@ public class OrderItem {
 		this.productId = cart.getProduct().getId();
 		this.productName = cart.getProduct().getName();
 		this.price = cart.getProduct().getPrice();
+		this.discount = cart.getProduct().getDiscount();
 		this.quantity = cart.getQuantity();
 		this.total = cart.getTotal();
 	}
@@ -105,6 +109,14 @@ public class OrderItem {
 
 	public void setTotal(long total) {
 		this.total = total;
+	}
+
+	public int getDiscount() {
+		return discount;
+	}
+
+	public void setDiscount(int discount) {
+		this.discount = discount;
 	}
 
 }

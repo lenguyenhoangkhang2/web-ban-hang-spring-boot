@@ -23,12 +23,15 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 	private Long id;
 	private String email;
 	private String password;
+	private Boolean emailVerified;
 	private Collection<? extends GrantedAuthority> authorities;
 	private Map<String, Object> attributes;
 
-	public UserPrincipal(Long id, String email, String password, Collection<? extends GrantedAuthority> authorities) {
+	public UserPrincipal(Long id, String email, String password, Boolean emailVerified,
+			Collection<? extends GrantedAuthority> authorities) {
 		this.id = id;
 		this.email = email;
+		this.emailVerified = emailVerified;
 		this.password = password;
 		this.authorities = authorities;
 	}
@@ -38,7 +41,7 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 				.map(role -> new SimpleGrantedAuthority(role.getName().name())).collect(Collectors.toList());
 
 		UserPrincipal userPrincipal = new UserPrincipal(userCredential.getId(), userCredential.getEmail(),
-				userCredential.getPassword(), authorities);
+				userCredential.getPassword(), userCredential.getEmailVerified(), authorities);
 
 		logger.debug("Create UserPrincipal from UserCredential: " + userPrincipal.toString());
 
@@ -95,7 +98,7 @@ public class UserPrincipal implements OAuth2User, UserDetails {
 
 	@Override
 	public boolean isEnabled() {
-		return true;
+		return emailVerified;
 	}
 
 	public Long getId() {

@@ -1,17 +1,21 @@
 package com.congnghejava.webbanhang.payload.response;
 
+import com.congnghejava.webbanhang.models.OrderItem;
+
 public class OrderItemResponse {
 	private long productId;
 	private String productName;
 	private int price;
+	private int discount;
 	private int quantity;
 	private long total;
 
-	public OrderItemResponse(String productName, int price, int quantity, long total) {
-		this.productName = productName;
-		this.price = price;
-		this.quantity = quantity;
-		this.total = total;
+	public OrderItemResponse(OrderItem orderItem) {
+		this.productName = orderItem.getProductName();
+		this.price = orderItem.getPrice();
+		this.quantity = orderItem.getQuantity();
+		this.discount = orderItem.getDiscount();
+		this.total = orderItem.getTotal();
 	}
 
 	public String getProductName() {
@@ -56,6 +60,14 @@ public class OrderItemResponse {
 
 	public void setProductId(long productId) {
 		this.productId = productId;
+	}
+
+	public int getDiscount() {
+		return discount;
+	}
+
+	public void setDiscount(int discount) {
+		this.discount = discount;
 	}
 
 }

@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 import com.congnghejava.webbanhang.models.UserCredential;
 
 public class UserInfoResponse {
+	private Long id;
 	private String email;
 	private boolean emailVerified;
 	private List<String> authorities;
@@ -23,6 +24,7 @@ public class UserInfoResponse {
 	private String detail;
 
 	public UserInfoResponse(UserCredential userCredential) {
+		this.id = userCredential.getId();
 		this.email = userCredential.getEmail();
 		this.emailVerified = userCredential.getEmailVerified();
 		this.authorities = userCredential.getRoles().stream().map(role -> role.getName().name())
@@ -114,6 +116,14 @@ public class UserInfoResponse {
 
 	public void setDetail(String detail) {
 		this.detail = detail;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 
 }

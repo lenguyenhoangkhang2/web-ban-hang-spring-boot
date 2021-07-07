@@ -1,13 +1,15 @@
 package com.congnghejava.webbanhang.exception;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.NoSuchElementException;
+
+import javax.mail.MessagingException;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.MailException;
 import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -22,13 +24,10 @@ public class ControllerExceptionHandler {
 	@ExceptionHandler(MethodArgumentNotValidException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
 	public ResponseEntity<?> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
-		List<String> errors = new ArrayList<String>();
+		Map<String, String> errors = new HashMap<>();
 
 		for (FieldError error : ex.getBindingResult().getFieldErrors()) {
-			errors.add(error.getField() + ": " + error.getDefaultMessage());
-		}
-		for (ObjectError error : ex.getBindingResult().getGlobalErrors()) {
-			errors.add(error.getObjectName() + ": " + error.getDefaultMessage());
+			errors.put(error.getField(), error.getDefaultMessage());
 		}
 
 		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errors);
@@ -43,8 +42,8 @@ public class ControllerExceptionHandler {
 
 	@ExceptionHandler(NoSuchElementException.class)
 	@ResponseStatus(HttpStatus.NOT_FOUND)
-	public ErrorMessage handleNoSuchElementException(NoSuchElementException ex) {
-		return new ErrorMessage(HttpStatus.NOT_FOUND.value(), ex.getLocalizedMessage());
+	public ResponseEntity<?> handleNoSuchElementException(NoSuchElementException ex) {
+		return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new MessageResponse(ex.getLocalizedMessage()));
 	}
 
 	@ExceptionHandler(InvalidRequestException.class)
@@ -52,8 +51,25 @@ public class ControllerExceptionHandler {
 		return ResponseEntity.badRequest().body(new MessageResponse("Stripe chỉ nhận thanh toán dưới 100 triệu đồng!"));
 	}
 
+	@ExceptionHandler(MailException.class)
+	public ResponseEntity<?> handleSendMailException(MailException ex) {
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+				.body(new MessageResponse(ex.getLocalizedMessage()));
+	}
+
+	@ExceptionHandler(MessagingException.class)
+	public ResponseEntity<?> handleSendMailException(MessagingException ex) {
+		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+				.body(new MessageResponse(ex.getLocalizedMessage()));
+	}
+
+	@ExceptionHandler(TokenExpiredException.class)
+	public ResponseEntity<?> handleTokenExpiredException(TokenExpiredException ex) {
+		return ResponseEntity.status(HttpStatus.GONE).body(new MessageResponse(ex.getLocalizedMessage()));
+	}
+
 	@ExceptionHandler(BadRequestException.class)
-	public ResponseEntity<?> handleValidationExceptions(MethodArgumentNotValidException ex) {
-		return ResponseEntity.badRequest().body(ex.getMessage());
+	public ResponseEntity<?> handleValidationExceptions(BadRequestException ex) {
+		return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new MessageResponse(ex.getLocalizedMessage()));
 	}
 }

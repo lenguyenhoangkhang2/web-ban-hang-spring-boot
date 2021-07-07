@@ -8,12 +8,13 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.congnghejava.webbanhang.config.AppProperties;
 import com.congnghejava.webbanhang.exception.BadRequestException;
 import com.congnghejava.webbanhang.models.Cart;
 import com.congnghejava.webbanhang.models.EPaymentMethod;
@@ -40,10 +41,6 @@ import com.stripe.param.checkout.SessionCreateParams.LineItem;
 @RestController
 @RequestMapping("/payment")
 public class PaymentController {
-
-	@Autowired
-	AppProperties appProperties;
-
 	@Autowired
 	UserService userService;
 
@@ -56,13 +53,23 @@ public class PaymentController {
 	@Autowired
 	OrderService orderService;
 
+	@Value("${app.stripe.tokenSecret}")
+	private String tokenSecret;
+
+	@Value("${app.stripe.publishableKey}")
+	private String publishableKey;
+
+	@Value("${app.stripe.endpointSecret}")
+	private String endpointSecret;
+
 	@PostConstruct
 	public void init() {
-		Stripe.apiKey = appProperties.getStripe().getTokenSecret();
+		Stripe.apiKey = tokenSecret;
 	}
 
 	@PostMapping("/stripe")
-	public String paymentWithCheckoutPage(@CurrentUser UserPrincipal userPrincipal) throws StripeException {
+	@PreAuthorize("hasRole('ROLE_USER')")
+	public String createStripeSession(@CurrentUser UserPrincipal userPrincipal) throws StripeException {
 
 		// @formatter:off
 		User user = userService.getCurrentUser(userPrincipal);
@@ -94,7 +101,7 @@ public class PaymentController {
 		Event event = null;
 
 		try {
-			event = Webhook.constructEvent(body, sigHeader, appProperties.getStripe().getEndpointSecret());
+			event = Webhook.constructEvent(body, sigHeader, endpointSecret);
 		} catch (JsonSyntaxException e) {
 			response.setStatus(400);
 			return;
@@ -136,7 +143,6 @@ public class PaymentController {
 							.setUnitAmount(calPrice(item.getProduct()))
 							.setProductData(SessionCreateParams.LineItem.PriceData.ProductData.builder()
 								.setName(item.getProduct().getName())
-//								.addImage(item.getProduct().getUrlOfficalImage())
 							.build())
 						.build())
 					.build())
@@ -146,9 +152,8 @@ public class PaymentController {
 	}
 
 	public Long calPrice(Product product) {
-		Long price = Math.round(Double.valueOf(product.getPrice() * (100 - product.getDiscount()) / 100) / 10000)
-				* 10000;
-		return price;
+		Double priceWithDiscount = Double.valueOf(product.getPrice() * (1 - product.getDiscount() / 100));
+		return Math.round(priceWithDiscount / 10000) * 10000;
 	}
 
 }
